@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 /**
  * @brief Class representing a 2D map where each space is either filled or empty
  */
