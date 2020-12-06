@@ -15,13 +15,11 @@ ARoomTemplate::ARoomTemplate()
 
 	// Add a root component we can move the bounding box relative to
 	USceneComponent* root = CreateDefaultSubobject<USceneComponent>("Root");
-	root->AttachToComponent(rootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	root->RegisterComponent();
+	root->SetupAttachment(rootComponent);
 	
 	// Create bounding box
 	RoomBounds = CreateDefaultSubobject<UBoxComponent>("Room outline");
-	RoomBounds->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	RoomBounds->RegisterComponent();
+	RoomBounds->SetupAttachment(root);
 }
 
 void ARoomTemplate::OnConstruction(const FTransform& Transform)
