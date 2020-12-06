@@ -7,15 +7,15 @@
 /**
  * @brief Class representing a 2D map where each space is either filled or empty
  */
-class UNREALSFAS_API MapGrid
+class UNREALSFAS_API FMapGrid
 {
 public:
     static constexpr unsigned int MaxWidth = 32;
     static constexpr unsigned int MaxDepth = 32;
 
 public:
-    MapGrid(const uint32 MaximumWidth = MaxWidth);
-	~MapGrid();
+    FMapGrid(const uint32 MaximumWidth = MaxWidth);
+	~FMapGrid();
 
     /**
     * @brief Set the state of a tile

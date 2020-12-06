@@ -26,7 +26,7 @@ void AUnrealSFASMaze::BeginPlay()
 		const float blockHeight = 5.0f;
 		const float blockZPos = 50.0f;
 
-		MapGrid maze(mazeSize);
+		FMapGrid maze(mazeSize);
 		maze.SetRow(0,  0b11111111111111111111);
 		maze.SetRow(1,  0b10100000000000000001);
 		maze.SetRow(2,  0b10101010111111111101);

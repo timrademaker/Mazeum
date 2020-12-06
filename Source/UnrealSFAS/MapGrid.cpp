@@ -3,17 +3,17 @@
 
 #include "MapGrid.h"
 
-MapGrid::MapGrid(const uint32 MaximumWidth)
+FMapGrid::FMapGrid(const uint32 MaximumWidth)
     : ShiftOffset(MaxWidth - MaximumWidth)
 {
     check(MaximumWidth <= MaxWidth && "Maximum maze width cannot exceed 32");
 }
 
-MapGrid::~MapGrid()
+FMapGrid::~FMapGrid()
 {
 }
 
-void MapGrid::Set(unsigned int X, unsigned int Y, bool IsOccupied)
+void FMapGrid::Set(unsigned int X, unsigned int Y, bool IsOccupied)
 {
     uint32 mask = (1 << X);
 
@@ -27,12 +27,12 @@ void MapGrid::Set(unsigned int X, unsigned int Y, bool IsOccupied)
     }
 }
 
-void MapGrid::SetRow(unsigned int Y, const uint32 Row)
+void FMapGrid::SetRow(unsigned int Y, const uint32 Row)
 {
     Grid[Y] = Row;
 }
 
-bool MapGrid::IsEmpty(unsigned int X, unsigned int Y)
+bool FMapGrid::IsEmpty(unsigned int X, unsigned int Y)
 {
     return ((Grid[Y] >> (MaxWidth - ShiftOffset - (X + 1))) & 1) == 0;
 }
