@@ -3,10 +3,13 @@
 
 #include "MapGrid.h"
 
-FMapGrid::FMapGrid(const uint32 MaximumWidth)
-    : ShiftOffset(MaxWidth - MaximumWidth)
+FMapGrid::FMapGrid(const uint32 MaximumWidth, const uint32 MaximumDepth)
+    : ShiftOffset(MaxGridWidth - MaximumWidth)
+    , Width(MaximumWidth)
+    , Depth(MaximumDepth)
 {
-    check(MaximumWidth <= MaxWidth && "Maximum maze width cannot exceed 32");
+    check(MaximumWidth <= MaxGridWidth && "Maximum maze width cannot exceed 32");
+    check(MaximumDepth <= MaxGridDepth && "Maximum maze depth cannot exceed 32");
 }
 
 FMapGrid::~FMapGrid()
@@ -32,7 +35,25 @@ void FMapGrid::SetRow(unsigned int Y, const uint32 Row)
     Grid[Y] = Row;
 }
 
-bool FMapGrid::IsEmpty(unsigned int X, unsigned int Y)
+bool FMapGrid::IsEmpty(unsigned int X, unsigned int Y) const
 {
-    return ((Grid[Y] >> (MaxWidth - ShiftOffset - (X + 1))) & 1) == 0;
+    return ((Grid[Y] >> (MaxGridWidth - ShiftOffset - (X + 1))) & 1) == 0;
+}
+
+void FMapGrid::Clear()
+{
+    for (int row = 0; row < MaxGridDepth; ++row)
+    {
+        SetRow(row, 0);
+    }
+}
+
+uint32 FMapGrid::GetWidth() const
+{
+    return Width;
+}
+
+uint32 FMapGrid::GetDepth() const
+{
+    return Depth;
 }

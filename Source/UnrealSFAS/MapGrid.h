@@ -7,12 +7,11 @@
  */
 class UNREALSFAS_API FMapGrid
 {
-public:
-    static constexpr unsigned int MaxWidth = 32;
-    static constexpr unsigned int MaxDepth = 32;
+    static constexpr unsigned int MaxGridWidth = 32;
+    static constexpr unsigned int MaxGridDepth = 32;
 
 public:
-    FMapGrid(const uint32 MaximumWidth = MaxWidth);
+    FMapGrid(const uint32 MaximumWidth = MaxGridWidth, const uint32 MaximumDepth = MaxGridDepth);
 	~FMapGrid();
 
     /**
@@ -35,10 +34,22 @@ public:
     * @params Y The Y-coordinate of the grid to get the value for
     * @returns True if the tile at the specified coordinate is empty
     */
-    bool IsEmpty(unsigned int X, unsigned int Y);
+    bool IsEmpty(unsigned int X, unsigned int Y) const;
+
+    /**
+    * @brief Set all grid values to 0
+    */
+    void Clear();
+
+    uint32 GetWidth() const;
+    uint32 GetDepth() const;
 
 protected:
-    uint32 Grid[MaxDepth] = { 0 };
+    uint32 Grid[MaxGridDepth] = { 0 };
+    /// The user-defined maximum width of the grid
+    uint32 Width = MaxGridWidth;
+    /// The user-defined maximum depth of the grid
+    uint32 Depth = MaxGridDepth;
     /// If the desired maximum width is not MaxWidth, IsEmpty needs this to make sure that it gets the correct value
     uint32 ShiftOffset = 0;
 };
