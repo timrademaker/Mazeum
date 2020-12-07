@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/StaticMeshComponent.h"
-#include "DoorMeshComponent.generated.h"
+#include "BuildingBlockMeshComponent.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UNREALSFAS_API UDoorMeshComponent : public UStaticMeshComponent
+class UNREALSFAS_API UBuildingBlockMeshComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()
-	
+
 public:
     UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The actor equivalent of this component. In the case of a door mesh, this would be the actual door."))
-    TSubclassOf<AActor> DoorActor;
+        TSubclassOf<AActor> ActorEquivalent;
 };
