@@ -34,7 +34,7 @@ protected:
 private:
 	/* Generation */
 	static FMapGrid SelectMuseumLayout();
-	static void GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& RoomMask);
+	void GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& RoomMask) const;
 	static FMapGrid GenerateVentLayout(const FMapGrid& RoomMask);	// Placeholder, as this currently does not have a way of specifying vent entrances (unless the room mask has an empty spot where the vent goes)
 
 	/* Verification */
@@ -47,4 +47,16 @@ private:
 	/* Helpers */
 	static unsigned int ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction);
 	static unsigned int ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction);
+	/**
+	* @brief Get a (random) room that fits within specified dimensions
+	* @params Width The maximum width of the room
+	* @params Depth The maximum depth of the room
+	* @params OutRoom The room that was found. Can be nullptr
+	* @params OutShouldBeRotated True if the room fits the dimensions, but not with its default rotation
+	*/
+	void GetFittingRoom(const int Width, const int Depth, UClass* OutRoom, bool& OutShouldBeRotated) const;
+
+public:
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))
+	TArray<TSubclassOf<ARoomTemplate>> PossibleRooms;
 };

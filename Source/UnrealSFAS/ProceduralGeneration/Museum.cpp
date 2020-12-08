@@ -20,7 +20,7 @@ void AMuseum::BeginPlay()
 	FMapGrid museumLayout = AMuseum::SelectMuseumLayout();
 	TArray<FRoomPlacement> rooms;
 	FMapGrid roomMask;
-	AMuseum::GenerateRoomPlacement(museumLayout, rooms, roomMask);
+	GenerateRoomPlacement(museumLayout, rooms, roomMask);
 
 	/*
 	FMapGrid ventLayout = GenerateVentLayout(roomMask);
@@ -50,7 +50,7 @@ FMapGrid AMuseum::SelectMuseumLayout()
 	return grid;
 }
 
-void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& RoomMask)
+void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& RoomMask) const
 {
 	RoomMask.Clear();
 
@@ -102,11 +102,23 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					emptyWidth = emptyTiles;
 				}
 
-				// TODO: Find a suitable room for these dimensions
-				// TODO: OutRoomPlacement.Add(room)
-				// TODO: Fill RoomMask
-				// TODO: Determine how much space is left
-				// TODO: Repeat while a suitable room can be found and emptyWidth and emptyDepth are more than 0
+				// Find a suitable room for these dimensions
+				UClass* room = nullptr;
+				bool roomShouldBeRotated = false;
+				GetFittingRoom(emptyWidth, emptyDepth, room, roomShouldBeRotated);
+
+				if (room)
+				{
+					// TODO: Determine how the room should be rotated (based on roomShouldBeRotated and dir)
+					FRoomPlacement placement;
+					placement.Position = FIntVector(x, y, 0);
+					placement.RoomType = room;
+					placement.Rotation = FRotator();
+					OutRoomPlacement.Add(placement);
+
+					// TODO: Fill RoomMask (based on roomShouldBeRotated and dir)
+					//  Remember: Current x, y is a wall
+				}
 			}
 		}
 	}
@@ -209,4 +221,24 @@ unsigned int AMuseum::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout
 	}
 
 	return unoccupiedWallCount;
+}
+
+void AMuseum::GetFittingRoom(const int Width, const int Depth, UClass* OutRoom, bool& OutShouldBeRotated) const
+{
+	for (size_t i = 0; i < PossibleRooms.Num(); ++i)
+	{
+		auto size = Cast<ARoomTemplate>(PossibleRooms[i])->RoomSize;
+		if (size.X <= Width && size.Y <= Depth)
+		{
+			OutRoom = PossibleRooms[i];
+			OutShouldBeRotated = false;
+			break;
+		}
+		else if (size.X <= Depth && size.Y <= Width)
+		{
+			OutRoom = PossibleRooms[i];
+			OutShouldBeRotated = true;
+			break;
+		}
+	}
 }
