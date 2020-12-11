@@ -6,6 +6,14 @@
 #include "Components/StaticMeshComponent.h"
 #include "BuildingBlockMeshComponent.generated.h"
 
+UENUM()
+enum class EBuildingBlockType : uint8
+{
+    Other = 0,
+    Door,
+    Vent
+};
+
 /**
  * 
  */
@@ -17,4 +25,7 @@ class UNREALSFAS_API UBuildingBlockMeshComponent : public UStaticMeshComponent
 public:
     UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The actor equivalent of this component. In the case of a door mesh, this would be the actual door."))
         TSubclassOf<AActor> ActorEquivalent;
+
+    UPROPERTY(EditDefaultsOnly)
+        EBuildingBlockType BuildingBlockType;
 };
