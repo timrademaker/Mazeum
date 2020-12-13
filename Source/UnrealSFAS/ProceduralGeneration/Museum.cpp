@@ -19,7 +19,7 @@ void AMuseum::BeginPlay()
 	// Generate museum
 	FMapGrid museumLayout = AMuseum::SelectMuseumLayout();
 	TArray<FRoomPlacement> rooms;
-	FMapGrid roomMask;
+	FMapGrid roomMask(10, 10);
 	GenerateRoomPlacement(museumLayout, rooms, roomMask);
 
 	/*
@@ -82,24 +82,27 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					dir = EDirection::Down;
 					emptyTiles = ContiguousEmptyTileCount(MuseumLayout, RoomMask, x, y + 1, dir);
 				}
+
+				if (emptyTiles == 0)
+				{
+					continue;
+				}
 				// TODO: Potential issue: This could leave out corner tiles in some directions if there's empty space above the tile, but not enough to place a room
 
 
 				// Determine the number of walls with adjacent empty space
 				// Variables representing the dimensions of the empty space
-				int emptyDepth = 0;
-				int emptyWidth = 0;
+				unsigned int emptyDepth = emptyTiles;
+				unsigned int emptyWidth = 0;
 
 				if (dir == EDirection::Left || dir == EDirection::Right)
 				{
-					emptyDepth = emptyTiles;
 					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Down);
 
 				}
 				else
 				{
-					emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Right);
-					emptyWidth = emptyTiles;
+					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Right);
 				}
 
 				// Find a suitable room for these dimensions
@@ -113,11 +116,77 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					FRoomPlacement placement;
 					placement.Position = FIntVector(x, y, 0);
 					placement.RoomType = room;
-					placement.Rotation = FRotator();
+					if (roomShouldBeRotated)
+					{
+						// TODO: Make sure this rotation is correct in regards to door placement
+						placement.Rotation = FRotator(0.0f, 0.0f, 90.0f);
+					}
+					else
+					{
+						// TODO: Make sure this rotation is correct in regards to door placement
+						placement.Rotation = FRotator();
+					}
 					OutRoomPlacement.Add(placement);
+
+					// TODO: Rotate these
+					const FIntVector roomSize = Cast<ARoomTemplate>(room->GetDefaultObject())->RoomSize;
+					const unsigned int roomX = roomShouldBeRotated ? roomSize.Y : roomSize.X;
+					const unsigned int roomY = roomShouldBeRotated ? roomSize.X : roomSize.Y;
 
 					// TODO: Fill RoomMask (based on roomShouldBeRotated and dir)
 					//  Remember: Current x, y is a wall
+					if (dir == EDirection::Left)
+					{
+						// Fill X to X - depth
+						// Fill Y to Y + width
+
+						for (unsigned int i = x - roomX; i < x; --i)
+						{
+							for (unsigned int j = y; j < y + roomY; ++j)
+							{
+								RoomMask.Set(i, j, true);
+							}
+						}
+					}
+					else if (dir == EDirection::Right)
+					{
+						// Fill X to X + depth
+						// Fill Y to Y + width
+
+						for (unsigned int i = x + 1; i < x + roomX; ++i)
+						{
+							for (unsigned int j = y; j < y + roomY; ++j)
+							{
+								RoomMask.Set(i, j, true);
+							}
+						}
+					}
+					else if (dir == EDirection::Up)
+					{
+						// Fill X to X + width
+						// Fill Y to Y - depth
+
+						for (unsigned int i = x; i < x + roomX; ++i)
+						{
+							for (unsigned int j = y - roomY; j < y; ++j)
+							{
+								RoomMask.Set(i, j, true);
+							}
+						}
+					}
+					else if (dir == EDirection::Down)
+					{
+						// Fill X to X + width
+						// Fill Y to Y + depth
+
+						for (unsigned int i = x; i < x + roomX; ++i)
+						{
+							for (unsigned int j = y + 1; j < y + roomY; ++j)
+							{
+								RoomMask.Set(i, j, true);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -158,13 +227,17 @@ unsigned int AMuseum::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, con
 	int maxX = MuseumLayout.GetWidth() - 1;
 	int maxY = MuseumLayout.GetDepth() - 1;
 
+	bool roomEmpty = RoomMask.IsEmpty(X, Y);
+
 	while (X >= 0 && X <= maxX
 		&& Y >= 0 && Y <= maxY
 		&& MuseumLayout.IsEmpty(X, Y)
-		&& RoomMask.IsEmpty(X, Y)
+		&& roomEmpty
 		)
 	{
 		++emptyTiles;
+
+		roomEmpty = RoomMask.IsEmpty(X, Y);
 
 		if (Direction == EDirection::Left)
 		{
@@ -191,11 +264,11 @@ unsigned int AMuseum::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout
 {
 	int unoccupiedWallCount = 0;
 
-	int maxX = MuseumLayout.GetWidth() - 1;
-	int maxY = MuseumLayout.GetDepth() - 1;
+	const int maxX = MuseumLayout.GetWidth() - 1;
+	const int maxY = MuseumLayout.GetDepth() - 1;
 
-	while (X > 0 && X < maxX
-		&& Y > 0 && Y < maxY
+	while (X >= 0 && X <= maxX
+		&& Y >= 0 && Y <= maxY
 		&& !MuseumLayout.IsEmpty(X, Y)
 		&& (RoomMask.IsEmpty(X - 1, Y) || RoomMask.IsEmpty(X + 1, Y) || RoomMask.IsEmpty(X, Y - 1) || RoomMask.IsEmpty(X, Y + 1))
 		)
@@ -223,11 +296,16 @@ unsigned int AMuseum::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout
 	return unoccupiedWallCount;
 }
 
-void AMuseum::GetFittingRoom(const int Width, const int Depth, UClass* OutRoom, bool& OutShouldBeRotated) const
+void AMuseum::GetFittingRoom(const int Width, const int Depth, UClass*& OutRoom, bool& OutShouldBeRotated) const
 {
+	if (Width == 0 || Depth == 0)
+	{
+		return;
+	}
+
 	for (size_t i = 0; i < PossibleRooms.Num(); ++i)
 	{
-		auto size = Cast<ARoomTemplate>(PossibleRooms[i])->RoomSize;
+		auto size = Cast<ARoomTemplate>(PossibleRooms[i]->GetDefaultObject())->RoomSize;
 		if (size.X <= Width && size.Y <= Depth)
 		{
 			OutRoom = PossibleRooms[i];

@@ -54,7 +54,7 @@ private:
 	* @params OutRoom The room that was found. Can be nullptr
 	* @params OutShouldBeRotated True if the room fits the dimensions, but not with its default rotation
 	*/
-	void GetFittingRoom(const int Width, const int Depth, UClass* OutRoom, bool& OutShouldBeRotated) const;
+	void GetFittingRoom(const int Width, const int Depth, UClass*& OutRoom, bool& OutShouldBeRotated) const;
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))
