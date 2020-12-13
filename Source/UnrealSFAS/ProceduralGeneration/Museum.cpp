@@ -112,9 +112,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 
 				if (room)
 				{
-					// TODO: Determine how the room should be rotated (based on roomShouldBeRotated and dir)
+					// TODO: Determine how the room should be rotated (door placement)
 					FRoomPlacement placement;
-					placement.Position = FIntVector(x, y, 0);
 					placement.RoomType = room;
 					placement.Direction = dir;
 
@@ -128,14 +127,12 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 						// TODO: Make sure this rotation is correct in regards to door placement
 						placement.Rotation = FRotator();
 					}
-					OutRoomPlacement.Add(placement);
 
-					// TODO: Rotate these
 					const FIntVector roomSize = Cast<ARoomTemplate>(room->GetDefaultObject())->RoomSize;
 					const unsigned int roomX = roomShouldBeRotated ? roomSize.Y : roomSize.X;
 					const unsigned int roomY = roomShouldBeRotated ? roomSize.X : roomSize.Y;
 
-					// TODO: Fill RoomMask (based on roomShouldBeRotated and dir)
+					// Fill RoomMask (based on roomShouldBeRotated and dir)
 					//  Remember: Current x, y is a wall
 					if (dir == EDirection::Left)
 					{
@@ -149,6 +146,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 								RoomMask.Set(i, j, true);
 							}
 						}
+
+						placement.Position = FIntVector(x - 1, y, 0);
 					}
 					else if (dir == EDirection::Right)
 					{
@@ -162,6 +161,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 								RoomMask.Set(i, j, true);
 							}
 						}
+
+						placement.Position = FIntVector(x + 1, y, 0);
 					}
 					else if (dir == EDirection::Up)
 					{
@@ -175,6 +176,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 								RoomMask.Set(i, j, true);
 							}
 						}
+
+						placement.Position = FIntVector(x, y - 1, 0);
 					}
 					else if (dir == EDirection::Down)
 					{
@@ -188,7 +191,11 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 								RoomMask.Set(i, j, true);
 							}
 						}
+
+						placement.Position = FIntVector(x, y + 1, 0);
 					}
+
+					OutRoomPlacement.Add(placement);
 				}
 			}
 		}
