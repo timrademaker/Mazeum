@@ -50,6 +50,4 @@ protected:
     uint32 Width = MaxGridWidth;
     /// The user-defined maximum depth of the grid
     uint32 Depth = MaxGridDepth;
-    /// If the desired maximum width is not MaxWidth, IsEmpty needs this to make sure that it gets the correct value
-    uint32 ShiftOffset = 0;
 };
