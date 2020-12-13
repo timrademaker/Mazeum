@@ -116,6 +116,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					FRoomPlacement placement;
 					placement.Position = FIntVector(x, y, 0);
 					placement.RoomType = room;
+					placement.Direction = dir;
+
 					if (roomShouldBeRotated)
 					{
 						// TODO: Make sure this rotation is correct in regards to door placement

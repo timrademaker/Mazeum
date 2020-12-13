@@ -14,4 +14,5 @@ struct UNREALSFAS_API FRoomPlacement
     TSubclassOf<ARoomTemplate> RoomType;
     FIntVector Position;
     FRotator Rotation;
+    EDirection Direction;
 };
