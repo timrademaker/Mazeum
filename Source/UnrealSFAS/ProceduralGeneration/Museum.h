@@ -41,6 +41,7 @@ private:
 	static bool LayoutIsValid(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, const FMapGrid& VentLayout);
 
 	/* Placement */
+	void PlaceHalls(const FMapGrid& MuseumLayout);
 	void PlaceRooms(const TArray<FRoomPlacement>& Rooms);
 	void PlaceVents(const FMapGrid& VentMap);
 
@@ -51,12 +52,17 @@ private:
 	* @brief Get a (random) room that fits within specified dimensions
 	* @params Width The maximum width of the room
 	* @params Depth The maximum depth of the room
+	* @params PlacementDirection The direction in which the room should be placed
 	* @params OutRoom The room that was found. Can be nullptr
-	* @params OutShouldBeRotated True if the room fits the dimensions, but not with its default rotation
+	* @params OutRoomRotation The rotation of the room when it is placed
 	*/
-	void GetFittingRoom(const int Width, const int Depth, UClass*& OutRoom, bool& OutShouldBeRotated) const;
+	void GetFittingRoom(const int Width, const int Depth, const EDirection PlacementDirection, UClass*& OutRoom, FRotator& OutRoomRotation) const;
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))
 	TArray<TSubclassOf<ARoomTemplate>> PossibleRooms;
+
+	// TODO: Remove as this is temporary
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> HallBlock;
 };

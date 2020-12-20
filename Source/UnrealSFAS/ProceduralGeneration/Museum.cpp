@@ -3,6 +3,9 @@
 
 #include "Museum.h"
 
+#include "../ConstantsFunctionLibrary.h"
+
+
 // Sets default values
 AMuseum::AMuseum()
 {
@@ -107,30 +110,20 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 
 				// Find a suitable room for these dimensions
 				UClass* room = nullptr;
-				bool roomShouldBeRotated = false;
-				GetFittingRoom(emptyWidth, emptyDepth, room, roomShouldBeRotated);
+				FRotator roomRotation;
+				GetFittingRoom(emptyWidth, emptyDepth, dir, room, roomRotation);
 
 				if (room)
 				{
-					// TODO: Determine how the room should be rotated (door placement)
 					FRoomPlacement placement;
 					placement.RoomType = room;
 					placement.Direction = dir;
-
-					if (roomShouldBeRotated)
-					{
-						// TODO: Make sure this rotation is correct in regards to door placement
-						placement.Rotation = FRotator(0.0f, 0.0f, 90.0f);
-					}
-					else
-					{
-						// TODO: Make sure this rotation is correct in regards to door placement
-						placement.Rotation = FRotator();
-					}
+					placement.Rotation = roomRotation;
+					
 
 					const FIntVector roomSize = Cast<ARoomTemplate>(room->GetDefaultObject())->RoomSize;
-					const unsigned int roomX = roomShouldBeRotated ? roomSize.Y : roomSize.X;
-					const unsigned int roomY = roomShouldBeRotated ? roomSize.X : roomSize.Y;
+					const unsigned int roomX = roomRotation.IsNearlyZero() ? roomSize.X : roomSize.Y;
+					const unsigned int roomY = roomRotation.IsNearlyZero() ? roomSize.Y : roomSize.X;
 
 					// Fill RoomMask (based on roomShouldBeRotated and dir)
 					//  Remember: Current x, y is a wall
@@ -217,10 +210,55 @@ bool AMuseum::LayoutIsValid(const FMapGrid& MuseumLayout, const FMapGrid& RoomMa
 	return true;
 }
 
+void AMuseum::PlaceHalls(const FMapGrid& MuseumLayout)
+{
+	if (!HallBlock)
+	{
+		return;
+	}
+
+	const FVector blockSize = UConstantsFunctionLibrary::GetBlockSize();
+	const FVector museumLocation = GetActorLocation();
+
+	for (unsigned int x = 0; x < MuseumLayout.GetWidth(); ++x)
+	{
+		for (unsigned int y = 0; y < MuseumLayout.GetDepth(); ++y)
+		{
+			if (!MuseumLayout.IsEmpty(x, y))
+			{
+				FVector loc = FVector(x * blockSize.X, y * blockSize.Y, 0.0f) + museumLocation;
+
+				AActor* block = GetWorld()->SpawnActor<AActor>(HallBlock, loc, FRotator());
+
+			}
+		}
+	}
+}
+
 void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 {
-	// TODO: Implement
-	check(false);
+	const FVector blockSize = UConstantsFunctionLibrary::GetBlockSize();
+	const FVector museumLocation = GetActorLocation();
+
+	for (const auto& room : Rooms)
+	{
+		FVector roomLocation = museumLocation + FVector(room.Position.X, room.Position.Y, 0.0f) * blockSize;
+		const FVector realRoomSize = FVector(room.RoomType->GetDefaultObject<ARoomTemplate>()->RoomSize) * blockSize;
+
+		// Adjust spawning location, as the tile a room is supposed to spawn on is "incorrect" for Up and Left
+		if (room.Direction == EDirection::Up)
+		{
+			roomLocation.Y -= (realRoomSize.Y - blockSize.Y);
+		}
+		else if (room.Direction == EDirection::Left)
+		{
+			roomLocation.X -= (realRoomSize.X - blockSize.X);
+		}
+
+		// Spawn actor (temporary solution)
+		// TODO: Fix rotation
+		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, room.Rotation);
+	}
 }
 
 void AMuseum::PlaceVents(const FMapGrid& VentMap)
@@ -305,27 +343,171 @@ unsigned int AMuseum::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout
 	return unoccupiedWallCount;
 }
 
-void AMuseum::GetFittingRoom(const int Width, const int Depth, UClass*& OutRoom, bool& OutShouldBeRotated) const
+void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection PlacementDirection, UClass*& OutRoom, FRotator& OutRoomRotation) const
 {
 	if (Width == 0 || Depth == 0)
 	{
 		return;
 	}
 
-	for (size_t i = 0; i < PossibleRooms.Num(); ++i)
+	OutRoom = nullptr;
+	OutRoomRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+
+	UClass* possibleRoom = nullptr;
+	bool possibleRoomShouldBeRotated = false;
+	bool hasFoundRoom = false;
+
+	TArray<FIntPoint> roomDoors;
+
+	for (size_t i = 0; i < PossibleRooms.Num() && !hasFoundRoom; ++i)
 	{
 		auto size = Cast<ARoomTemplate>(PossibleRooms[i]->GetDefaultObject())->RoomSize;
 		if (size.X <= Width && size.Y <= Depth)
 		{
-			OutRoom = PossibleRooms[i];
-			OutShouldBeRotated = false;
-			break;
+			possibleRoom = PossibleRooms[i];
+			possibleRoomShouldBeRotated = false;
 		}
 		else if (size.X <= Depth && size.Y <= Width)
 		{
-			OutRoom = PossibleRooms[i];
-			OutShouldBeRotated = true;
-			break;
+			possibleRoom = PossibleRooms[i];
+			possibleRoomShouldBeRotated = true;
+		}
+
+		if (possibleRoom)
+		{
+			roomDoors.Empty();
+			Cast<ARoomTemplate>(possibleRoom)->GetLocationsOfBlocksWithType(EBuildingBlockType::Door, possibleRoom, roomDoors);
+
+			// Check left if:    Up/Down && rotated || dir == right && !rotated
+			// Check right if:   Up/Down && rotated || dir == left  && !rotated
+			// Check up if:   Left/Right && rotated || dir == down  && !rotated
+			// Check down if: Left/Right && rotated || dir == up    && !rotated
+
+			if ((PlacementDirection == EDirection::Left && !possibleRoomShouldBeRotated)
+				|| (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down)))
+			{
+				for (const auto& door : roomDoors)
+				{
+					// Check the right wall for doors
+					if (door.X == size.X - 1)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Up)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+						}
+						else if (PlacementDirection == EDirection::Down)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+						}
+
+						break;
+					}
+					// TODO: Check left wall
+				}
+			}
+			else if ((PlacementDirection == EDirection::Right && !possibleRoomShouldBeRotated) 
+					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down)))
+			{
+				for (const auto& door : roomDoors)
+				{
+					// Check the left wall for doors
+					if (door.X == 0)
+					{
+						hasFoundRoom = true;
+						
+						if (PlacementDirection == EDirection::Up)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+						}
+						else if (PlacementDirection == EDirection::Down)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+						}
+
+						break;
+					}
+					// TODO: Check right wall
+				}
+			}
+			else if ((PlacementDirection == EDirection::Up && !possibleRoomShouldBeRotated)
+				|| (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
+			{
+				for (const auto& door : roomDoors)
+				{
+					// Check the bottom wall for doors
+					if (door.Y == size.Y - 1)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Left)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+						}
+						else if (PlacementDirection == EDirection::Right)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+						}
+
+						break;
+					}
+					// TODO: Check top wall
+				}
+			}
+			else if ((PlacementDirection == EDirection::Down && !possibleRoomShouldBeRotated)
+					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
+			{
+				for (const auto& door : roomDoors)
+				{
+					// Check the top wall for doors
+					if (door.Y == 0)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Left)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+						}
+						else if (PlacementDirection == EDirection::Right)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+						}
+
+						break;
+					}
+					// Check the bottom wall for doors
+					else if (door.Y == size.Y - 1)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Left)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+						}
+						else if (PlacementDirection == EDirection::Right)
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+						}
+						else
+						{
+							OutRoomRotation = FRotator(0.0f, 0.0f, 180.0f);
+						}
+
+						break;
+					}
+				}
+			}
+
+			if (!hasFoundRoom)
+			{
+				possibleRoom = nullptr;
+			}
+			else
+			{
+				OutRoom = possibleRoom;
+			}
 		}
 	}
 }
