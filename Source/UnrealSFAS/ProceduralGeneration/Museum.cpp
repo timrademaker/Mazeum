@@ -358,6 +358,7 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 
 	UClass* possibleRoom = nullptr;
 	bool possibleRoomShouldBeRotated = false;
+	bool possibleRoomCanBeRotated = false;
 	bool hasFoundRoom = false;
 
 	TArray<FIntPoint> roomDoors;
@@ -370,10 +371,16 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 			possibleRoom = PossibleRooms[i];
 			possibleRoomShouldBeRotated = false;
 		}
-		else if (size.X <= Depth && size.Y <= Width)
+		
+		if (size.X <= Depth && size.Y <= Width)
 		{
-			possibleRoom = PossibleRooms[i];
-			possibleRoomShouldBeRotated = true;
+			if (!possibleRoom)
+			{
+				possibleRoom = PossibleRooms[i];
+				possibleRoomShouldBeRotated = true;
+			}
+
+			possibleRoomCanBeRotated = false;
 		}
 
 		if (possibleRoom)
@@ -386,7 +393,7 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 			// Check up if:   Left/Right && rotated || dir == down  && !rotated
 			// Check down if: Left/Right && rotated || dir == up    && !rotated
 
-			if ((PlacementDirection == EDirection::Left && !possibleRoomShouldBeRotated)
+			if ((PlacementDirection == EDirection::Left && (!possibleRoomShouldBeRotated || possibleRoomCanBeRotated))
 				|| (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down)))
 			{
 				for (const auto& door : roomDoors)
@@ -429,7 +436,9 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 					}
 				}
 			}
-			else if ((PlacementDirection == EDirection::Right && !possibleRoomShouldBeRotated) 
+			
+			if (!hasFoundRoom
+				&& (PlacementDirection == EDirection::Right && (!possibleRoomShouldBeRotated || possibleRoomCanBeRotated))
 					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down)))
 			{
 				for (const auto& door : roomDoors)
@@ -472,7 +481,9 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 					}
 				}
 			}
-			else if ((PlacementDirection == EDirection::Up && !possibleRoomShouldBeRotated)
+			
+			if (!hasFoundRoom
+				&& (PlacementDirection == EDirection::Up && (!possibleRoomShouldBeRotated || possibleRoomCanBeRotated))
 					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
 			{
 				for (const auto& door : roomDoors)
@@ -515,7 +526,9 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 					}
 				}
 			}
-			else if ((PlacementDirection == EDirection::Down && !possibleRoomShouldBeRotated)
+			
+			if (!hasFoundRoom
+				&& (PlacementDirection == EDirection::Down && (!possibleRoomShouldBeRotated || possibleRoomCanBeRotated))
 					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
 			{
 				for (const auto& door : roomDoors)
