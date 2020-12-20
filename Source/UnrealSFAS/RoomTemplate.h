@@ -29,6 +29,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static void GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations);
 
+	void SetRoomRotation(const FRotator Rotation);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

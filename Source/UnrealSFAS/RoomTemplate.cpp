@@ -67,6 +67,11 @@ void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockT
 	return;
 }
 
+void ARoomTemplate::SetRoomRotation(const FRotator Rotation)
+{
+	RoomBounds->SetRelativeRotation(Rotation);
+}
+
 // Called when the game starts or when spawned
 void ARoomTemplate::BeginPlay()
 {
