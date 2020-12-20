@@ -257,6 +257,15 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 			roomLocation.X -= (realRoomSize.X - blockSize.X);
 		}
 
+		if (room.Rotation.Equals(FRotator(0.0f, -90.0f, 0.0f)) || room.Rotation.Equals(FRotator(0.0f, 90.0f, 0.0f)))
+		{
+			// Move the room left and up by half of the difference in the room's dimensions to shift the room's origin to the correct location
+			const FIntVector roomSize = room.RoomType->GetDefaultObject<ARoomTemplate>()->RoomSize;
+			int diff = FMath::Abs(roomSize.Y - roomSize.X);
+			roomLocation.X -= (diff / 2) * blockSize.X;
+			roomLocation.Y -= (diff / 2) * blockSize.Y;
+		}
+
 		// Spawn actor (temporary solution)
 		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, FRotator());
 		r->SetRoomRotation(room.Rotation);
