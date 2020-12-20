@@ -132,7 +132,7 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 						// Fill X to X - depth
 						// Fill Y to Y + width
 
-						for (unsigned int i = x - roomX; i < x; --i)
+						for (unsigned int i = x - roomX; i < x; ++i)
 						{
 							for (unsigned int j = y; j < y + roomY; ++j)
 							{
@@ -232,7 +232,6 @@ void AMuseum::PlaceHalls(const FMapGrid& MuseumLayout)
 				FVector loc = FVector(x * blockSize.X, y * blockSize.Y, 0.0f) + museumLocation;
 
 				AActor* block = GetWorld()->SpawnActor<AActor>(HallBlock, loc, FRotator());
-
 			}
 		}
 	}
