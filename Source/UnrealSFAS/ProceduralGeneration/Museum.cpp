@@ -122,8 +122,8 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					
 
 					const FIntVector roomSize = Cast<ARoomTemplate>(room->GetDefaultObject())->RoomSize;
-					const unsigned int roomX = roomRotation.IsNearlyZero() ? roomSize.X : roomSize.Y;
-					const unsigned int roomY = roomRotation.IsNearlyZero() ? roomSize.Y : roomSize.X;
+					const unsigned int roomX = (roomRotation.IsNearlyZero() || roomRotation.Equals(FRotator(0.0f, 180.0f, 0.0f))) ? roomSize.X : roomSize.Y;
+					const unsigned int roomY = (roomRotation.IsNearlyZero() || roomRotation.Equals(FRotator(0.0f, 180.0f, 0.0f))) ? roomSize.Y : roomSize.X;
 
 					// Fill RoomMask (based on roomShouldBeRotated and dir)
 					//  Remember: Current x, y is a wall
@@ -189,6 +189,9 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					}
 
 					OutRoomPlacement.Add(placement);
+
+					// Go over the same tile again, as there might be another free tile in a different direction
+					x -= 1;
 				}
 			}
 		}
@@ -256,8 +259,8 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 		}
 
 		// Spawn actor (temporary solution)
-		// TODO: Fix rotation
-		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, room.Rotation);
+		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, FRotator());
+		r->SetRoomRotation(room.Rotation);
 	}
 }
 
@@ -396,16 +399,35 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 
 						if (PlacementDirection == EDirection::Up)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
 						}
 						else if (PlacementDirection == EDirection::Down)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
 						}
 
 						break;
 					}
-					// TODO: Check left wall
+					// Check the left wall for doors
+					else if (door.X == 0)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Up)
+						{
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
+						}
+						else if (PlacementDirection == EDirection::Down)
+						{
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
+						}
+						else
+						{
+							OutRoomRotation = FRotator(0.0f, 180.0f, 0.0f);
+						}
+
+						break;
+					}
 				}
 			}
 			else if ((PlacementDirection == EDirection::Right && !possibleRoomShouldBeRotated) 
@@ -420,20 +442,39 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 						
 						if (PlacementDirection == EDirection::Up)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
 						}
 						else if (PlacementDirection == EDirection::Down)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
 						}
 
 						break;
 					}
-					// TODO: Check right wall
+					// Check the right wall for doors
+					else if (door.X == size.X - 1)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Up)
+						{
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
+						}
+						else if (PlacementDirection == EDirection::Down)
+						{
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
+						}
+						else
+						{
+							OutRoomRotation = FRotator(0.0f, 180.0f, 0.0f);
+						}
+
+						break;
+					}
 				}
 			}
 			else if ((PlacementDirection == EDirection::Up && !possibleRoomShouldBeRotated)
-				|| (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
+					 || (possibleRoomShouldBeRotated && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
 			{
 				for (const auto& door : roomDoors)
 				{
@@ -444,16 +485,35 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 
 						if (PlacementDirection == EDirection::Left)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
 						}
 						else if (PlacementDirection == EDirection::Right)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
 						}
 
 						break;
 					}
-					// TODO: Check top wall
+					// Check the top wall for doors
+					else if (door.Y == 0)
+					{
+						hasFoundRoom = true;
+
+						if (PlacementDirection == EDirection::Left)
+						{
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
+						}
+						else if (PlacementDirection == EDirection::Right)
+						{
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
+						}
+						else
+						{
+							OutRoomRotation = FRotator(0.0f, 180.0f, 0.0f);
+						}
+
+						break;
+					}
 				}
 			}
 			else if ((PlacementDirection == EDirection::Down && !possibleRoomShouldBeRotated)
@@ -468,11 +528,11 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 
 						if (PlacementDirection == EDirection::Left)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
 						}
 						else if (PlacementDirection == EDirection::Right)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
 						}
 
 						break;
@@ -484,15 +544,15 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 
 						if (PlacementDirection == EDirection::Left)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, -90.0f);
+							OutRoomRotation = FRotator(0.0f, -90.0f, 0.0f);
 						}
 						else if (PlacementDirection == EDirection::Right)
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 90.0f);
+							OutRoomRotation = FRotator(0.0f, 90.0f, 0.0f);
 						}
 						else
 						{
-							OutRoomRotation = FRotator(0.0f, 0.0f, 180.0f);
+							OutRoomRotation = FRotator(0.0f, 180.0f, 0.0f);
 						}
 
 						break;
