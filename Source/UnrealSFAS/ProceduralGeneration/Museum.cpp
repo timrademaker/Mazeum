@@ -85,13 +85,12 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 					dir = EDirection::Down;
 					emptyTiles = ContiguousEmptyTileCount(MuseumLayout, RoomMask, x, y + 1, dir);
 				}
+				// TODO: Issue: Not all directions are checked if one of them has some space but not enough to place a room
 
 				if (emptyTiles == 0)
 				{
 					continue;
 				}
-				// TODO: Potential issue: This could leave out corner tiles in some directions if there's empty space above the tile, but not enough to place a room
-
 
 				// Determine the number of walls with adjacent empty space
 				// Variables representing the dimensions of the empty space
@@ -147,7 +146,7 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 						// Fill X to X + depth
 						// Fill Y to Y + width
 
-						for (unsigned int i = x + 1; i < x + roomX; ++i)
+						for (unsigned int i = x + 1; i <= x + roomX; ++i)
 						{
 							for (unsigned int j = y; j < y + roomY; ++j)
 							{
@@ -179,7 +178,7 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 
 						for (unsigned int i = x; i < x + roomX; ++i)
 						{
-							for (unsigned int j = y + 1; j < y + roomY; ++j)
+							for (unsigned int j = y + 1; j <= y + roomY; ++j)
 							{
 								RoomMask.Set(i, j, true);
 							}
