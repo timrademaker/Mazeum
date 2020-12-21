@@ -35,7 +35,7 @@ private:
 	/* Generation */
 	static FMapGrid SelectMuseumLayout();
 	void GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& RoomMask) const;
-	static FMapGrid GenerateVentLayout(const FMapGrid& RoomMask);	// Placeholder, as this currently does not have a way of specifying vent entrances (unless the room mask has an empty spot where the vent goes)
+	static FMapGrid GenerateVentLayout(const FMapGrid& VentEntranceMask);
 
 	/* Verification */
 	static bool LayoutIsValid(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, const FMapGrid& VentLayout);
@@ -57,6 +57,12 @@ private:
 	* @params OutRoomRotation The rotation of the room when it is placed
 	*/
 	void GetFittingRoom(const int Width, const int Depth, const EDirection PlacementDirection, UClass*& OutRoom, FRotator& OutRoomRotation) const;
+	/**
+	* @brief Create a mask with all vent entrances from the rooms in RoomPlacement
+	* @params RoomPlacement The rooms to get the vents from
+	* @returns A map grid with all of the room's vent entrances
+	*/
+	static FMapGrid CreateVentEntranceMask(const TArray<FRoomPlacement>& RoomPlacement, int MaskWidth, int MaskDepth);
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))

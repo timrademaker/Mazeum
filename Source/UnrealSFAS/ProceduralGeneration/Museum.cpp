@@ -200,7 +200,7 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 	
 }
 
-FMapGrid AMuseum::GenerateVentLayout(const FMapGrid& RoomMask)
+FMapGrid AMuseum::GenerateVentLayout(const FMapGrid& VentEntranceMask)
 {
 	// TODO: Implement
 	check(false);
@@ -603,4 +603,71 @@ void AMuseum::GetFittingRoom(const int Width, const int Depth, const EDirection 
 			}
 		}
 	}
+}
+
+FMapGrid AMuseum::CreateVentEntranceMask(const TArray<FRoomPlacement>& RoomPlacement, int MaskWidth, int MaskDepth)
+{
+	FMapGrid ventEntrances(MaskWidth, MaskDepth);
+
+	TArray<FIntPoint> ventLocations;
+	
+
+	bool clockwiseRotation = false;
+	bool counterclockwiseRotation = false;
+	bool upsideDownRotation = false;
+
+	for (const auto& room : RoomPlacement)
+	{
+		clockwiseRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, 90.0f);
+		counterclockwiseRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, -90.0f);
+		upsideDownRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, 180.0f);
+
+		const ARoomTemplate* roomTemplate = room.RoomType->GetDefaultObject<ARoomTemplate>();
+
+		FIntPoint roomLeftTop(room.Position.X, room.Position.Y);
+		if (room.Direction == EDirection::Left)
+		{
+			roomLeftTop.X -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.Y : roomTemplate->RoomSize.X;
+			roomLeftTop.X += 1;
+		}
+		else if (room.Direction == EDirection::Up)
+		{
+			roomLeftTop.Y -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.X : roomTemplate->RoomSize.Y;
+			roomLeftTop.Y += 1;
+		}
+
+		ventLocations.Empty();
+		roomTemplate->GetLocationsOfBlocksWithType(EBuildingBlockType::Vent, room.RoomType, ventLocations);
+
+		for (const auto& ventPos : ventLocations)
+		{
+			int ventX = 0;
+			int ventY = 0;
+
+			if (clockwiseRotation)
+			{
+				ventX = roomTemplate->RoomSize.Y - 1 - ventPos.Y;
+				ventY = ventPos.X;
+			}
+			else if (upsideDownRotation)
+			{
+				ventX = roomTemplate->RoomSize.X - 1 - ventPos.X;
+				ventY = roomTemplate->RoomSize.Y - 1 - ventPos.Y;
+			}
+			else if (counterclockwiseRotation)
+			{
+				ventX = ventPos.Y;
+				ventY = roomTemplate->RoomSize.X - 1 - ventPos.X;
+			}
+			else
+			{
+				ventX = ventPos.X;
+				ventY = ventPos.Y;
+			}
+
+			ventEntrances.Set(ventX + roomLeftTop.X, ventY + roomLeftTop.Y, true);
+		}
+	}
+
+	return ventEntrances;
 }
