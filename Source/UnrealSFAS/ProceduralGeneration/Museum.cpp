@@ -300,17 +300,13 @@ unsigned int AMuseum::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, con
 	int maxX = MuseumLayout.GetWidth() - 1;
 	int maxY = MuseumLayout.GetDepth() - 1;
 
-	bool roomEmpty = RoomMask.IsEmpty(X, Y);
-
 	while (X >= 0 && X <= maxX
 		&& Y >= 0 && Y <= maxY
 		&& MuseumLayout.IsEmpty(X, Y)
-		&& roomEmpty
+		&& RoomMask.IsEmpty(X, Y)
 		)
 	{
 		++emptyTiles;
-
-		roomEmpty = RoomMask.IsEmpty(X, Y);
 
 		if (Direction == EDirection::Left)
 		{
