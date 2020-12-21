@@ -6,6 +6,8 @@
 
 #include "../RoomTemplate.h"
 
+enum class EDirection;
+
 /**
  * 
  */
