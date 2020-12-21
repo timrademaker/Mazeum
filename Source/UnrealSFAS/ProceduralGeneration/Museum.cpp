@@ -262,19 +262,27 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 		{
 			// Move the room left and up by half of the difference in the room's dimensions to shift the room's origin to the correct location
 			const FIntVector roomSize = room.RoomType->GetDefaultObject<ARoomTemplate>()->RoomSize;
-			int diff = FMath::Abs(roomSize.Y - roomSize.X);
+			const int diff = FMath::Abs(roomSize.Y - roomSize.X);
 			
-			if (room.Direction == EDirection::Left || room.Direction == EDirection::Down)
+			if (room.Direction == EDirection::Left)
 			{
-				diff = -diff;
+				roomLocation.X += (diff / 2) * blockSize.X;
+				roomLocation.Y += (diff / 2) * blockSize.Y;
 			}
-			
-			roomLocation.X -= (diff / 2) * blockSize.X;
-			roomLocation.Y -= (diff / 2) * blockSize.Y;
+			else if (room.Direction == EDirection::Down || room.Direction == EDirection::Right)
+			{
+				roomLocation.X -= (diff / 2) * blockSize.X;
+				roomLocation.Y += (diff / 2) * blockSize.Y;
+			}
+			else if(room.Direction == EDirection::Up)
+			{
+				roomLocation.X -= (diff / 2) * blockSize.X;
+				roomLocation.Y -= (diff / 2) * blockSize.Y;
+			}
 		}
 
 		// Spawn actor (temporary solution)
-		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, FRotator());
+		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, GetActorRotation());
 		r->SetRoomRotation(room.Rotation);
 	}
 }
