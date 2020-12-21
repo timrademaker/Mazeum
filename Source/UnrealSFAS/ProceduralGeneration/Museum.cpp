@@ -22,7 +22,7 @@ void AMuseum::BeginPlay()
 	// Generate museum
 	FMapGrid museumLayout = AMuseum::SelectMuseumLayout();
 	TArray<FRoomPlacement> rooms;
-	FMapGrid roomMask(10, 10);
+	FMapGrid roomMask(museumLayout.GetWidth(), museumLayout.GetDepth());
 	GenerateRoomPlacement(museumLayout, rooms, roomMask);
 
 	/*
