@@ -261,6 +261,12 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 			// Move the room left and up by half of the difference in the room's dimensions to shift the room's origin to the correct location
 			const FIntVector roomSize = room.RoomType->GetDefaultObject<ARoomTemplate>()->RoomSize;
 			int diff = FMath::Abs(roomSize.Y - roomSize.X);
+			
+			if (room.Direction == EDirection::Left || room.Direction == EDirection::Down)
+			{
+				diff = -diff;
+			}
+			
 			roomLocation.X -= (diff / 2) * blockSize.X;
 			roomLocation.Y -= (diff / 2) * blockSize.Y;
 		}
