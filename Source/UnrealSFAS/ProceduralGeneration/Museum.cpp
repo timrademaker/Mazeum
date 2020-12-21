@@ -94,16 +94,18 @@ void AMuseum::GenerateRoomPlacement(const FMapGrid& MuseumLayout, TArray<FRoomPl
 
 				// Determine the number of walls with adjacent empty space
 				// Variables representing the dimensions of the empty space
-				unsigned int emptyDepth = emptyTiles;
+				unsigned int emptyDepth = 0;
 				unsigned int emptyWidth = 0;
 
 				if (dir == EDirection::Left || dir == EDirection::Right)
 				{
-					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Down);
+					emptyWidth = emptyTiles;
+					emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Down);
 
 				}
 				else
 				{
+					emptyDepth = emptyTiles;
 					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, RoomMask, x, y, EDirection::Right);
 				}
 
