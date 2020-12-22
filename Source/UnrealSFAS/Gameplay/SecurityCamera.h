@@ -53,6 +53,8 @@ public:
 
 private:
 	FCollisionShape VisionCollisionShape;
+	FCollisionQueryParams CollisionQueryParams;
+
 	APawn* PlayerPawn;
 	UAlarmComponent* AlarmComponent;
 

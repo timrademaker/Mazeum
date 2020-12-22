@@ -34,6 +34,8 @@ ASecurityCamera::ASecurityCamera()
 	CameraAreaDecal->DecalSize = FVector(CameraVisionRadius);
 
 	VisionCollisionShape.SetCapsule(CameraVisionRadius, 50.0f);
+
+	CollisionQueryParams.AddIgnoredActor(this);
 }
 
 // Called when the game starts or when spawned
@@ -88,10 +90,7 @@ bool ASecurityCamera::CameraHasSpottedPlayer()
 	const FQuat traceRotaton = UKismetMathLibrary::FindLookAtRotation(traceStart, traceEnd).Quaternion();
 	FHitResult hitResult;
 
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-
-	if (GetWorld()->SweepSingleByChannel(hitResult, traceStart, traceEnd, traceRotaton, ECollisionChannel::ECC_Camera, VisionCollisionShape, queryParams))
+	if (GetWorld()->SweepSingleByChannel(hitResult, traceStart, traceEnd, traceRotaton, ECollisionChannel::ECC_Camera, VisionCollisionShape, CollisionQueryParams))
 	{
 		if (hitResult.GetActor() == PlayerPawn)
 		{
