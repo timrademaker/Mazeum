@@ -35,9 +35,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+#if WITH_EDITOR
 private:
 	void UpdateBlockPlacementTable();
-
+	void SaveBlockPlacementTable(const FString& PackageFileName, UObject* PackageObj);
+#endif
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The size of the room template in tiles"))
@@ -48,4 +50,5 @@ public:
 	
 protected:
 	UBoxComponent* RoomBounds;
+
 };

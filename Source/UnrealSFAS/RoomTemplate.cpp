@@ -26,6 +26,10 @@ ARoomTemplate::ARoomTemplate()
 	// Create bounding box
 	RoomBounds = CreateDefaultSubobject<UBoxComponent>("Room outline");
 	RoomBounds->SetupAttachment(RootComponent);
+
+#if WITH_EDITOR
+	UPackage::PackageSavedEvent.AddUObject(this, &ARoomTemplate::SaveBlockPlacementTable);
+#endif
 }
 
 void ARoomTemplate::OnConstruction(const FTransform& Transform)
@@ -37,12 +41,13 @@ void ARoomTemplate::OnConstruction(const FTransform& Transform)
 	RoomBounds->SetBoxExtent(newExtent, false);
 	RoomBounds->SetRelativeLocation(newExtent);
 
-
+#if WITH_EDITOR
 	if (BuildingBlockPlacementTable)
 	{
 		check(BuildingBlockPlacementTable->GetRowStruct() == FBuildingBlockPlacementStruct::StaticStruct() && "BuildingBlockPlacementTable should use BuildingBlockPlacementStruct as row struct!");
 		UpdateBlockPlacementTable();
 	}
+#endif
 }
 
 void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations)
@@ -79,16 +84,13 @@ void ARoomTemplate::BeginPlay()
 
 }
 
+#if WITH_EDITOR
 void ARoomTemplate::UpdateBlockPlacementTable()
 {
-#if WITH_EDITOR
 	if (GetWorld() && GetWorld()->IsPlayInEditor())
 	{
 		return;
 	}
-#else
-	return;
-#endif
 
 	if (!BuildingBlockPlacementTable)
 	{
@@ -152,7 +154,16 @@ void ARoomTemplate::UpdateBlockPlacementTable()
 			}
 		}
 	}
-
-	// Save the data table
-	UEditorAssetLibrary::SaveAsset(BuildingBlockPlacementTable->GetPathName(), false);
 }
+
+void ARoomTemplate::SaveBlockPlacementTable(const FString& PackageFileName, UObject* PackageObj)
+{	
+	FString ownName = GetClass()->GetName().Replace(TEXT("_C"), TEXT(""));
+	FString packageName = PackageObj->GetName();
+	
+	if (packageName.EndsWith(ownName))
+	{
+		UEditorAssetLibrary::SaveAsset(BuildingBlockPlacementTable->GetPathName(), false);
+	}
+}
+#endif
