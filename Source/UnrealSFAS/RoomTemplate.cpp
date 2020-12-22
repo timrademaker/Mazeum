@@ -81,6 +81,15 @@ void ARoomTemplate::BeginPlay()
 
 void ARoomTemplate::UpdateBlockPlacementTable()
 {
+#if WITH_EDITOR
+	if (GetWorld() && GetWorld()->IsPlayInEditor())
+	{
+		return;
+	}
+#else
+	return;
+#endif
+
 	if (!BuildingBlockPlacementTable)
 	{
 		return;
