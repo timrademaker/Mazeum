@@ -10,6 +10,8 @@ class UDecalComponent;
 class USplineComponent;
 class UStaticMeshComponent;
 
+class UAlarmComponent;
+
 UCLASS()
 class UNREALSFAS_API ASecurityCamera : public AActor
 {
@@ -52,6 +54,7 @@ public:
 private:
 	FCollisionShape VisionCollisionShape;
 	APawn* PlayerPawn;
+	UAlarmComponent* AlarmComponent;
 
 	/// How far along the spline we are looking
 	float CurrentSplineTime = 0.0f;

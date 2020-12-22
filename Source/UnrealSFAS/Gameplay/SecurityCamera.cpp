@@ -3,6 +3,8 @@
 
 #include "SecurityCamera.h"
 
+#include "AlarmComponent.h"
+
 #include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -26,6 +28,8 @@ ASecurityCamera::ASecurityCamera()
 
 	CameraAreaDecal = CreateDefaultSubobject<UDecalComponent>("CameraViewDecal");
 	CameraAreaDecal->SetupAttachment(RootComponent);
+
+	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
 
 	CameraAreaDecal->DecalSize = FVector(CameraVisionRadius);
 
@@ -107,7 +111,7 @@ void ASecurityCamera::Tick(float DeltaTime)
 
 	if (CameraHasSpottedPlayer())
 	{
-		// TODO: Do something
+		AlarmComponent->TriggerAlarm();
 	}
 }
 
