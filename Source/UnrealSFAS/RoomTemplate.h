@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "Gameplay/GuardPatrolPath.h"
 #include "RoomBuildingBlocks/BuildingBlockMeshComponent.h"
 
 #include "RoomTemplate.generated.h"
+
 
 class UBoxComponent;
 class UDataTable;
@@ -44,6 +46,9 @@ private:
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The size of the room template in tiles"))
 	FIntVector RoomSize = FIntVector(5, 5, 5);
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The paths guards can follow in this room"))
+	TArray<FGuardPatrolPath> GuardPaths;
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* BuildingBlockPlacementTable;
