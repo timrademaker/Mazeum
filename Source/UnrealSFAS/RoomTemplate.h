@@ -54,5 +54,6 @@ protected:
 #if WITH_EDITOR
 private:
 	FString ClassName;
+	bool BuildingBlockPlacementTableIsDirty = false;
 #endif
 };

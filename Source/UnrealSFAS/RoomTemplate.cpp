@@ -48,6 +48,10 @@ void ARoomTemplate::OnConstruction(const FTransform& Transform)
 	const FVector newExtent = FVector(RoomSize) * blockDimensions * 0.5f;
 	RoomBounds->SetBoxExtent(newExtent, false);
 	RoomBounds->SetRelativeLocation(newExtent);
+
+#if WITH_EDITOR
+	BuildingBlockPlacementTableIsDirty = true;
+#endif
 }
 
 void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations)
@@ -134,7 +138,7 @@ void ARoomTemplate::UpdateBlockPlacementTable()
 				FIntPoint tilePosition = FIntPoint(FMath::FloorToInt(tilePositionInRoom.X), FMath::FloorToInt(tilePositionInRoom.Y));
 
 				// See if a row for this block type already exists
-				FString rowName = GetName() + FString::FromInt(static_cast<uint8>(block->BuildingBlockType));
+				FString rowName = ClassName + FString::FromInt(static_cast<uint8>(block->BuildingBlockType));
 
 				FBuildingBlockPlacementStruct* foundRow = BuildingBlockPlacementTable->FindRow<FBuildingBlockPlacementStruct>(FName(rowName), "RoomTemplate construction script");
 				if (foundRow)
@@ -158,15 +162,18 @@ void ARoomTemplate::UpdateBlockPlacementTable()
 
 void ARoomTemplate::OnPackageSaved(const FString& PackageFileName, UObject* PackageObj)
 {	
-	if (BuildingBlockPlacementTable)
+	if (BuildingBlockPlacementTable && BuildingBlockPlacementTableIsDirty)
 	{
 		FString packageName = PackageObj->GetName();
 
 		if (packageName.EndsWith(ClassName))
 		{
 			check(BuildingBlockPlacementTable->GetRowStruct() == FBuildingBlockPlacementStruct::StaticStruct() && "BuildingBlockPlacementTable should use BuildingBlockPlacementStruct as row struct!");
+
 			UpdateBlockPlacementTable();
 			UEditorAssetLibrary::SaveAsset(BuildingBlockPlacementTable->GetPathName(), false);
+
+			BuildingBlockPlacementTableIsDirty = false;
 		}
 	}
 }
