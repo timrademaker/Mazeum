@@ -58,6 +58,8 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 	if (ReverseCountDown <= 0.0f)
 	{
 		CurrentSplineTime += CameraMovementSpeed * DeltaTime * (IsMovingBackToSplineStart ? -1.0f : 1.0f);
+		CurrentSplineTime = FMath::Clamp(CurrentSplineTime, 0.0f, PathSpline->Duration);
+
 		const FVector targetPosition = PathSpline->GetLocationAtTime(CurrentSplineTime, ESplineCoordinateSpace::World);
 		CameraAreaDecal->SetWorldLocation(targetPosition);
 
@@ -71,7 +73,6 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 			}
 			else
 			{
-				CurrentSplineTime = FMath::Clamp(CurrentSplineTime, 0.0f, PathSpline->Duration);
 				ReverseCountDown = SplineEndWaitTime;
 				IsMovingBackToSplineStart = !IsMovingBackToSplineStart;
 			}
