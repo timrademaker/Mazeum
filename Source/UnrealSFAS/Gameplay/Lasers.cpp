@@ -30,11 +30,17 @@ ALasers::ALasers()
 void ALasers::OnConstruction(const FTransform& Transform)
 {
 #if WITH_EDITOR
-	for (UStaticMeshComponent* mesh : AddedLaserMeshes)
+	for (UStaticMeshComponent* laser : AddedLaserMeshes)
 	{
-		mesh->UnregisterComponent();
+		laser->UnregisterComponent();
 	}
 	AddedLaserMeshes.Empty();
+
+	for (UStaticMeshComponent* end : AddedLaserEnds)
+	{
+		end->UnregisterComponent();
+	}
+	AddedLaserEnds.Empty();
 #endif
 
 	if (NumberOfLasers == 0)
@@ -63,9 +69,7 @@ void ALasers::OnConstruction(const FTransform& Transform)
 
 			laser->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
 
-#if WITH_EDITOR
 			AddedLaserMeshes.Add(laser);
-#endif
 		}
 
 		if (LaserEndMesh)
@@ -83,10 +87,20 @@ void ALasers::OnConstruction(const FTransform& Transform)
 			rightLaserEnd->SetRelativeLocation(FVector(laserAreaExtent.X, 0.0f, laserZ));
 
 #if WITH_EDITOR
-			AddedLaserMeshes.Add(leftLaserEnd);
-			AddedLaserMeshes.Add(rightLaserEnd);
+			AddedLaserEnds.Add(leftLaserEnd);
+			AddedLaserEnds.Add(rightLaserEnd);
 #endif
 		}
+	}
+}
+
+void ALasers::SetLasersEnabled(const bool Enabled)
+{
+	LasersAreEnabled = Enabled;
+	
+	for (UStaticMeshComponent* laser : AddedLaserMeshes)
+	{
+		laser->SetVisibility(LasersAreEnabled);
 	}
 }
 
@@ -99,7 +113,7 @@ void ALasers::BeginPlay()
 
 void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<AActor>(OverlappedComponent) == PlayerPawn)
+	if (LasersAreEnabled && Cast<AActor>(OverlappedComponent) == PlayerPawn)
 	{
 		AlarmComponent->TriggerAlarm();
 	}

@@ -21,6 +21,9 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	UFUNCTION(BlueprintCallable, meta = (ToolTip = "Enable or disable the lasers", Keywords = "Enable Disable"))
+	void SetLasersEnabled(const bool Enabled);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -42,14 +45,15 @@ public:
 	UBoxComponent* LaserArea;
 
 protected:
-	bool IsActive = true;
+	bool LasersAreEnabled = true;
 
 private:
 	APawn* PlayerPawn;
 	UAlarmComponent* AlarmComponent;
 
-#if WITH_EDITOR
 	TArray<UStaticMeshComponent*> AddedLaserMeshes;
+#if WITH_EDITOR
+	TArray<UStaticMeshComponent*> AddedLaserEnds;
 #endif
 
 };
