@@ -28,7 +28,15 @@ ARoomTemplate::ARoomTemplate()
 	RoomBounds->SetupAttachment(RootComponent);
 
 #if WITH_EDITOR
-	UPackage::PackageSavedEvent.AddUObject(this, &ARoomTemplate::SaveBlockPlacementTable);
+	UPackage::PackageSavedEvent.AddUObject(this, &ARoomTemplate::OnPackageSaved);
+	ClassName = GetClass()->GetName().Replace(TEXT("_C"), TEXT(""));
+#endif
+}
+
+ARoomTemplate::~ARoomTemplate()
+{
+#if WITH_EDITOR
+	UPackage::PackageSavedEvent.RemoveAll(this);
 #endif
 }
 
@@ -40,14 +48,6 @@ void ARoomTemplate::OnConstruction(const FTransform& Transform)
 	const FVector newExtent = FVector(RoomSize) * blockDimensions * 0.5f;
 	RoomBounds->SetBoxExtent(newExtent, false);
 	RoomBounds->SetRelativeLocation(newExtent);
-
-#if WITH_EDITOR
-	if (BuildingBlockPlacementTable)
-	{
-		check(BuildingBlockPlacementTable->GetRowStruct() == FBuildingBlockPlacementStruct::StaticStruct() && "BuildingBlockPlacementTable should use BuildingBlockPlacementStruct as row struct!");
-		UpdateBlockPlacementTable();
-	}
-#endif
 }
 
 void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations)
@@ -156,14 +156,18 @@ void ARoomTemplate::UpdateBlockPlacementTable()
 	}
 }
 
-void ARoomTemplate::SaveBlockPlacementTable(const FString& PackageFileName, UObject* PackageObj)
+void ARoomTemplate::OnPackageSaved(const FString& PackageFileName, UObject* PackageObj)
 {	
-	FString ownName = GetClass()->GetName().Replace(TEXT("_C"), TEXT(""));
-	FString packageName = PackageObj->GetName();
-	
-	if (packageName.EndsWith(ownName))
+	if (BuildingBlockPlacementTable)
 	{
-		UEditorAssetLibrary::SaveAsset(BuildingBlockPlacementTable->GetPathName(), false);
+		FString packageName = PackageObj->GetName();
+
+		if (packageName.EndsWith(ClassName))
+		{
+			check(BuildingBlockPlacementTable->GetRowStruct() == FBuildingBlockPlacementStruct::StaticStruct() && "BuildingBlockPlacementTable should use BuildingBlockPlacementStruct as row struct!");
+			UpdateBlockPlacementTable();
+			UEditorAssetLibrary::SaveAsset(BuildingBlockPlacementTable->GetPathName(), false);
+		}
 	}
 }
 #endif

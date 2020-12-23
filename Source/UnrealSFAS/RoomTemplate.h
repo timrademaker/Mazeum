@@ -17,9 +17,9 @@ class UNREALSFAS_API ARoomTemplate : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
+public:
 	ARoomTemplate();
+	~ARoomTemplate();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -38,7 +38,7 @@ protected:
 #if WITH_EDITOR
 private:
 	void UpdateBlockPlacementTable();
-	void SaveBlockPlacementTable(const FString& PackageFileName, UObject* PackageObj);
+	void OnPackageSaved(const FString& PackageFileName, UObject* PackageObj);
 #endif
 
 public:
@@ -51,4 +51,8 @@ public:
 protected:
 	UBoxComponent* RoomBounds;
 
+#if WITH_EDITOR
+private:
+	FString ClassName;
+#endif
 };
