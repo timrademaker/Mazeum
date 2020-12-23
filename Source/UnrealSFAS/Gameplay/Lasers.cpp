@@ -1,0 +1,107 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Lasers.h"
+
+#include "AlarmComponent.h"
+
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+
+#include "Kismet/GameplayStatics.h"
+
+ALasers::ALasers()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	LaserArea = CreateDefaultSubobject<UBoxComponent>("LaserArea");
+	LaserArea->SetGenerateOverlapEvents(true);
+	LaserArea->SetBoxExtent(FVector(50.0f, 10.0f, 100.0f));
+
+	RootComponent = LaserArea;
+
+	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
+
+	FScriptDelegate overlapDelegate;
+	overlapDelegate.BindUFunction(this, "OnLaserAreaOverlap");
+	LaserArea->OnComponentBeginOverlap.Add(overlapDelegate);
+}
+
+void ALasers::OnConstruction(const FTransform& Transform)
+{
+#if WITH_EDITOR
+	for (UStaticMeshComponent* mesh : AddedLaserMeshes)
+	{
+		mesh->UnregisterComponent();
+	}
+	AddedLaserMeshes.Empty();
+#endif
+
+	if (NumberOfLasers == 0)
+	{
+		return;
+	}
+
+	const FVector laserAreaExtent = LaserArea->GetScaledBoxExtent();
+	const float offsetPerLaser = (laserAreaExtent.Z * 2.0f) / static_cast<float>(NumberOfLasers);
+
+	for (uint8 i = 0; i < NumberOfLasers; ++i)
+	{
+		const float laserZ = laserAreaExtent.Z - (offsetPerLaser / 2.0f) - (i * offsetPerLaser);
+
+		if (LaserBeamMesh)
+		{
+
+			UStaticMeshComponent* laser = NewObject<UStaticMeshComponent>(this);
+			laser->AttachToComponent(LaserArea, FAttachmentTransformRules::KeepRelativeTransform);
+			laser->SetRelativeLocation(FVector(0.0f, 0.0f, laserZ));
+
+			laser->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			laser->SetStaticMesh(LaserBeamMesh);
+
+			const float xScale = LaserArea->GetUnscaledBoxExtent().X / LaserBeamMesh->GetBounds().BoxExtent.X;
+
+			laser->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
+
+#if WITH_EDITOR
+			AddedLaserMeshes.Add(laser);
+#endif
+		}
+
+		if (LaserEndMesh)
+		{
+			UStaticMeshComponent* leftLaserEnd = NewObject<UStaticMeshComponent>(this);
+			
+			leftLaserEnd->AttachToComponent(LaserArea, FAttachmentTransformRules::KeepRelativeTransform);
+			
+			leftLaserEnd->SetRelativeLocation(FVector(-laserAreaExtent.X, 0.0f, laserZ));
+			
+			leftLaserEnd->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			leftLaserEnd->SetStaticMesh(LaserEndMesh);
+
+			UStaticMeshComponent* rightLaserEnd = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), NAME_None, RF_NoFlags, leftLaserEnd);
+			rightLaserEnd->SetRelativeLocation(FVector(laserAreaExtent.X, 0.0f, laserZ));
+
+#if WITH_EDITOR
+			AddedLaserMeshes.Add(leftLaserEnd);
+			AddedLaserMeshes.Add(rightLaserEnd);
+#endif
+		}
+	}
+}
+
+void ALasers::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
+}
+
+void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cast<AActor>(OverlappedComponent) == PlayerPawn)
+	{
+		AlarmComponent->TriggerAlarm();
+	}
+}
+
