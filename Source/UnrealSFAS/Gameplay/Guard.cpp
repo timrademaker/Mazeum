@@ -25,21 +25,7 @@ AGuard::AGuard()
 	CollisionQueryParams.AddIgnoredActor(this);
 }
 
-void AGuard::SetPatrolPath(const FGuardPatrolPath& NewPatrolPath, bool AbortCurrentPath)
-{
-	NextPatrolPath = new FGuardPatrolPath;
-	NextPatrolPath->PathDuration = NewPatrolPath.PathDuration;
-	NextPatrolPath->PathEndWaitTime = NewPatrolPath.PathEndWaitTime;
-	NextPatrolPath->PathSpline = NewPatrolPath.PathSpline;
-	NextPatrolPath->PathWeight = NewPatrolPath.PathWeight;
-
-	if (AbortCurrentPath)
-	{
-		StartNextPatrolPath();
-	}
-}
-
-void AGuard::SetPatrolPath(FGuardPatrolPath* NewPatrolPath, bool AbortCurrentPath)
+void AGuard::SetPatrolPath(UGuardPatrolPathComponent* NewPatrolPath, bool AbortCurrentPath)
 {
 	NextPatrolPath = NewPatrolPath;
 	
@@ -53,11 +39,6 @@ void AGuard::SetPatrolPath(FGuardPatrolPath* NewPatrolPath, bool AbortCurrentPat
 void AGuard::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (!CurrentPatrolPath)
-	{
-		StartNextPatrolPath();
-	}
 
 	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
 }
@@ -72,22 +53,33 @@ void AGuard::StartNextPatrolPath()
 
 		if (CurrentPatrolPath->PathEndWaitTime < 0.0f)
 		{
-			CurrentPatrolPath->PathSpline->SetClosedLoop(true);
+			CurrentPatrolPath->SetClosedLoop(true);
 		}
 
-		PatrolSpeed = CurrentPatrolPath->PathSpline->GetSplineLength() / CurrentPatrolPath->PathDuration;
-		SplineAdvancementRate = CurrentPatrolPath->PathSpline->Duration / CurrentPatrolPath->PathDuration;
+		PatrolSpeed = CurrentPatrolPath->GetSplineLength() / CurrentPatrolPath->PathDuration;
+		SplineAdvancementRate = CurrentPatrolPath->Duration / CurrentPatrolPath->PathDuration;
 	}
 }
 
 void AGuard::Patrol(float DeltaTime)
 {
+	if (!CurrentPatrolPath)
+	{
+		StartNextPatrolPath();
+	}
+
+	if (!CurrentPatrolPath)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("No patrol path"));
+		return;
+	}
+
 	if (ReverseCountDown <= 0.0f)
 	{
 		CurrentTimeAlongPatrolPath += SplineAdvancementRate * DeltaTime * (IsPatrollingBackwards ? -1.0f : 1.0f);
-		CurrentTimeAlongPatrolPath = FMath::Clamp(CurrentTimeAlongPatrolPath, 0.0f, CurrentPatrolPath->PathSpline->Duration);
+		CurrentTimeAlongPatrolPath = FMath::Clamp(CurrentTimeAlongPatrolPath, 0.0f, CurrentPatrolPath->Duration);
 
-		const FVector targetPosition = CurrentPatrolPath->PathSpline->GetLocationAtTime(CurrentTimeAlongPatrolPath, ESplineCoordinateSpace::World);
+		const FVector targetPosition = CurrentPatrolPath->GetLocationAtTime(CurrentTimeAlongPatrolPath, ESplineCoordinateSpace::World);
 		
 		// Move the guard
 		FVector movementDirection = targetPosition - GetActorLocation();

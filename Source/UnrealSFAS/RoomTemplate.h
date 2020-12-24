@@ -48,7 +48,7 @@ public:
 	FIntVector RoomSize = FIntVector(5, 5, 5);
 
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The paths guards can follow in this room"))
-	TArray<FGuardPatrolPath> GuardPaths;
+	TArray<UGuardPatrolPathComponent*> GuardPaths;
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* BuildingBlockPlacementTable;

@@ -8,7 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Guard.generated.h"
 
-struct FGuardPatrolPath;
+class UGuardPatrolPathComponent;
 class UAlarmComponent;
 
 UCLASS()
@@ -23,16 +23,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/** TODO: Remove this function, as it's only here for testing **/
-	UFUNCTION(BlueprintCallable)
-	void SetPatrolPath(const FGuardPatrolPath& NewPatrolPath, bool AbortCurrentPath = false);
-
 	/** 
 	 * Set a new patrol path for a guard 
 	 * @param NewPatrolPath The new patrol path
 	 * @param AbortCurrentPath If true, the guard will immediately start following the new path. This might lead to unexpected behaviour, like bumping into objects.
 	 */
-	void SetPatrolPath(FGuardPatrolPath* NewPatrolPath, bool AbortCurrentPath = false);
+	UFUNCTION(BlueprintCallable)
+	void SetPatrolPath(UGuardPatrolPathComponent* NewPatrolPath, bool AbortCurrentPath = false);
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,9 +55,9 @@ public:
 
 private:
 	/** The path the guard is currently patrolling */
-	FGuardPatrolPath* CurrentPatrolPath;
+	UGuardPatrolPathComponent* CurrentPatrolPath;
 	/** The path the guard will patrol after the current path is done */
-	FGuardPatrolPath* NextPatrolPath;
+	UGuardPatrolPathComponent* NextPatrolPath;
 
 	/** The speed at which the guard moves */
 	float PatrolSpeed = 0.0f;

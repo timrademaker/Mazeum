@@ -5,6 +5,7 @@
 
 #include "ConstantsFunctionLibrary.h"
 #include "BuildingBlockPlacementStruct.h"
+#include "StealthGameMode.h"
 
 #include "Components/BoxComponent.h"
 #include "EditorAssetLibrary.h"
@@ -86,6 +87,14 @@ void ARoomTemplate::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AStealthGameMode* gm = GetWorld()->GetAuthGameMode<AStealthGameMode>();
+	if (gm)
+	{
+		GuardPaths.Empty();
+		GetComponents<UGuardPatrolPathComponent>(GuardPaths);
+
+		gm->RegisterGuardPatrolPathArray(&GuardPaths);
+	}
 }
 
 #if WITH_EDITOR
