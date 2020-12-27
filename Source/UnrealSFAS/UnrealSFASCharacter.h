@@ -20,6 +20,7 @@ class AUnrealSFASCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 public:
 	AUnrealSFASCharacter();
+	virtual void BeginPlay() override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -58,6 +59,12 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
+	/** Called via input when the player tries to interact with something */
+	void OnInteract();
+
+	/** Called via input when the player tries to drop their held item */
+	void OnDropHeldItem();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -68,5 +75,16 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** The range at which the player can interact with items like pick-ups and vents */
+	UPROPERTY(EditInstanceOnly, Category = Interaction, meta = (ToolTip = "The range at which the player can interact with items", ClampMin = "0.0"))
+	float InteractionRange = 150.0f;
+
+private:
+	/** Actors the player can interact with through the "Interact" keybind */
+	TArray<AActor*> Interactables;
+
+	/** The item the player is holding */
+	class APickUpBase* HeldItem;
 };
 

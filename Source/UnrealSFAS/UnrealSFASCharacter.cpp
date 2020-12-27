@@ -1,6 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UnrealSFASCharacter.h"
+
+#include "InteractableInterface.h"
+#include "Gameplay/PickUpBase.h"
+
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -8,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AUnrealSFASCharacter
@@ -47,6 +52,14 @@ AUnrealSFASCharacter::AUnrealSFASCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
+void AUnrealSFASCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Find all actors implementing an interface
+	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UInteractableInterface::StaticClass(), Interactables);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -74,8 +87,11 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AUnrealSFASCharacter::OnResetVR);
-}
 
+	// Interaction with items
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AUnrealSFASCharacter::OnInteract);
+	PlayerInputComponent->BindAction("DropHeldItem", IE_Pressed, this, &AUnrealSFASCharacter::OnDropHeldItem);
+}
 
 void AUnrealSFASCharacter::OnResetVR()
 {
@@ -90,6 +106,47 @@ void AUnrealSFASCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector L
 void AUnrealSFASCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 		StopJumping();
+}
+
+void AUnrealSFASCharacter::OnInteract()
+{
+	IInteractableInterface* nearestInteractableInRange = nullptr;
+	float distanceToNearestInteractable = FLT_MAX;
+
+	// Find the nearest interactable
+	for (auto& interactable : Interactables)
+	{
+		float distance = FVector::Dist(GetActorLocation(), interactable->GetActorLocation());
+		if (distance <= InteractionRange)
+		{
+			if (distance < distanceToNearestInteractable)
+			{
+				distanceToNearestInteractable = distance;
+				nearestInteractableInRange = Cast<IInteractableInterface>(interactable);
+			}
+		}
+	}
+
+	// Interact with the nearest interactable
+	if (nearestInteractableInRange)
+	{
+		nearestInteractableInRange->Interact(this);
+		
+		if (!HeldItem)
+		{
+			// If the interactable is derived from APickUpBase, we now hold the item.
+			HeldItem = Cast<APickUpBase>(nearestInteractableInRange);
+		}
+	}
+}
+
+void AUnrealSFASCharacter::OnDropHeldItem()
+{
+	if (HeldItem)
+	{
+		HeldItem->DropItem();
+		HeldItem = nullptr;
+	}
 }
 
 void AUnrealSFASCharacter::TurnAtRate(float Rate)
