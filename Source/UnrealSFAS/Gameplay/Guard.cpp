@@ -23,6 +23,8 @@ AGuard::AGuard()
 
 	VisionCollisionShape.SetCapsule(VisionRadius, 50.0f);
 	CollisionQueryParams.AddIgnoredActor(this);
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void AGuard::SetPatrolPath(UGuardPatrolPathComponent* NewPatrolPath, bool AbortCurrentPath)
