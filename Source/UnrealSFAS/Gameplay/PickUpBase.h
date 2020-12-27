@@ -24,13 +24,14 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (ToolTip = "Drop this item"))
 	void DropItem();
 
-public:
-	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The weight of this item. A higher value means that the player moves slower when holding this item", ClampMin="0.0"))
-	float ItemWeight = 10.0f;
-
-	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The pick-up's mesh"))
-	UStaticMeshComponent* ItemMesh;
+	FORCEINLINE float GetItemWeight() const { return ItemWeight; }
 
 private:
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The weight of this item. A higher value means that the player moves slower when holding this item", ClampMin = "0.0", AllowPrivateAccess = "true"))
+	float ItemWeight = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The pick-up's mesh", AllowPrivateAccess = "true"))
+	UStaticMeshComponent* ItemMesh;
+
 	const AActor* ItemPickedUpByActor = nullptr;
 };
