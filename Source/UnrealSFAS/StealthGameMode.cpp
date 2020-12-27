@@ -26,6 +26,11 @@ void AStealthGameMode::StartPlay()
 {
     Super::StartPlay();
 
+    if (!GuardClass)
+    {
+        GuardClass = AGuard::StaticClass();
+    }
+
     {
         TArray<AActor*> worldActors;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), worldActors);
