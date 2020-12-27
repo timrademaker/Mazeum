@@ -93,6 +93,20 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("DropHeldItem", IE_Pressed, this, &AUnrealSFASCharacter::OnDropHeldItem);
 }
 
+float AUnrealSFASCharacter::CalculateMovementSpeedModifier() const
+{
+	if (!HeldItem)
+	{
+		return 1.0f;
+	}
+	else
+	{
+		const float weight = HeldItem->GetItemWeight();
+		const float modifier = 1.0f - weight / MaximumItemWeight;
+		return FMath::Clamp(modifier, MinimumMovementSpeedModifier, 1.0f);
+	}
+}
+
 void AUnrealSFASCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -171,7 +185,7 @@ void AUnrealSFASCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value * CalculateMovementSpeedModifier());
 	}
 }
 
@@ -186,6 +200,6 @@ void AUnrealSFASCharacter::MoveRight(float Value)
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value * CalculateMovementSpeedModifier());
 	}
 }
