@@ -87,9 +87,9 @@ void AGuard::Patrol(float DeltaTime)
 		AddMovementInput(PatrolSpeed * DeltaTime * movementDirection);
 
 		// Check if we reached the end of the spline in either direction
-		if (CurrentTimeAlongPatrolPath >= CurrentPatrolPath->PathSpline->Duration || CurrentTimeAlongPatrolPath <= 0.0f)
+		if (CurrentTimeAlongPatrolPath >= CurrentPatrolPath->Duration || CurrentTimeAlongPatrolPath <= 0.0f)
 		{
-			if (CurrentPatrolPath->PathSpline->IsClosedLoop())
+			if (CurrentPatrolPath->IsClosedLoop())
 			{
 				// Set this back to 0, as we're not reversing along the spline.
 				CurrentTimeAlongPatrolPath = 0.0f;
