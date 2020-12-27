@@ -2,18 +2,22 @@
 
 #pragma once
 
+#include "../InteractableInterface.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PickUpBase.generated.h"
 
 UCLASS()
-class UNREALSFAS_API APickUpBase : public AActor
+class UNREALSFAS_API APickUpBase : public AActor, public IInteractableInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	APickUpBase();
+
+	virtual void Interact(const AActor* InstigatedBy = nullptr) override;
 
 	UFUNCTION(BlueprintCallable, meta  = (ToolTip = "Pick this item up", DefaultToSelf="PickedUpBy"))
 	void PickUpItem(const AActor* PickedUpBy);

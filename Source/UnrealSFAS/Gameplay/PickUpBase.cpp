@@ -14,6 +14,11 @@ APickUpBase::APickUpBase()
 	RootComponent = ItemMesh;
 }
 
+void APickUpBase::Interact(const AActor* InstigatedBy)
+{
+	PickUpItem(InstigatedBy);
+}
+
 void APickUpBase::PickUpItem(const AActor* PickedUpBy)
 {
 	ItemPickedUpByActor = PickedUpBy;
