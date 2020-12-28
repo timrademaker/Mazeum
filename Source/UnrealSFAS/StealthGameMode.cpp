@@ -33,6 +33,23 @@ void AStealthGameMode::StartPlay()
     }
 
     {
+        TArray<AActor*> pickups;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickUpBase::StaticClass(), pickups);
+
+        // Subscribe to all pick-up events
+        for (AActor* pickup : pickups)
+        {
+            Cast<APickUpBase>(pickup)->OnItemPickedUp().AddUObject(this, &AStealthGameMode::OnTargetItemPickedUp);
+        }
+    }
+
+    if(PatrolPathArrays.Num() > 0)
+    {
+        TArray<TArray<UGuardPatrolPathComponent*>*> pathArrays = SelectPatrolPathArrays(MaximumGuardCount, RandomisationSeed);
+        SpawnGuards(pathArrays, RandomisationSeed);
+    }
+
+    {
         TArray<AActor*> worldActors;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), worldActors);
 
@@ -46,23 +63,6 @@ void AStealthGameMode::StartPlay()
                 Cast<UAlarmComponent>(alarmComponent)->OnAlarmTriggered().AddUObject(this, &AStealthGameMode::OnAlarmTriggered);
             }
         }
-    }
-
-    {
-        TArray<AActor*> pickups;
-        UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickUpBase::StaticClass(), pickups);
-
-        // Subscribe to all pick-up events
-        for (AActor* pickup : pickups)
-        {
-                Cast<APickUpBase>(pickup)->OnItemPickedUp().AddUObject(this, &AStealthGameMode::OnTargetItemPickedUp);
-        }
-    }
-
-    if(PatrolPathArrays.Num() > 0)
-    {
-        TArray<TArray<UGuardPatrolPathComponent*>*> pathArrays = SelectPatrolPathArrays(MaximumGuardCount, RandomisationSeed);
-        SpawnGuards(pathArrays, RandomisationSeed);
     }
 
     PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
