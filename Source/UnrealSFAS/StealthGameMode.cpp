@@ -9,6 +9,7 @@
 #include "Gameplay/PickUpBase.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SplineComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -127,6 +128,8 @@ void AStealthGameMode::SpawnGuards(const TArray<TArray<UGuardPatrolPathComponent
     FVector spawnLocation;
     FVector spawnRotation;
 
+    const float guardHalfHeight = Cast<AGuard>(GuardClass->GetDefaultObject())->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
     for (TArray<UGuardPatrolPathComponent*>* pathArray : PathArrays)
     {
         // Select random path
@@ -135,10 +138,19 @@ void AStealthGameMode::SpawnGuards(const TArray<TArray<UGuardPatrolPathComponent
         
         // Spawn guard at path start
         spawnLocation = pathToUse->GetLocationAtDistanceAlongSpline(0.0f, ESplineCoordinateSpace::World);
+        spawnLocation.Z += guardHalfHeight;
         spawnRotation = pathToUse->GetDirectionAtDistanceAlongSpline(0.0f, ESplineCoordinateSpace::World);
-        
+
         guard = GetWorld()->SpawnActor<AGuard>(GuardClass, spawnLocation, spawnRotation.Rotation());
-        guard->SetPatrolPath(pathToUse, true);
+
+        if (guard)
+        {
+            guard->SetPatrolPath(pathToUse, true);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%s"), TEXT("Failed to spawn guard"));
+        }
     }
 }
 
