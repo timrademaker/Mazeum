@@ -7,8 +7,8 @@
 #include "Gameplay/Guard.h"
 #include "Gameplay/GuardPatrolPath.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Components/SplineComponent.h"
-
 #include "Kismet/GameplayStatics.h"
 
 
@@ -52,6 +52,8 @@ void AStealthGameMode::StartPlay()
         TArray<TArray<UGuardPatrolPathComponent*>*> pathArrays = SelectPatrolPathArrays(MaximumGuardCount, RandomisationSeed);
         SpawnGuards(pathArrays, RandomisationSeed);
     }
+
+    PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
 void AStealthGameMode::RegisterGuardPatrolPathArray(TArray<UGuardPatrolPathComponent*>* const PatrolPaths)
@@ -64,8 +66,12 @@ void AStealthGameMode::RegisterGuardPatrolPathArray(TArray<UGuardPatrolPathCompo
 
 void AStealthGameMode::OnAlarmTriggered()
 {
-    // TODO: Do something
-    UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Alarm triggered!"));
+    OnGameLose();
+}
+
+void AStealthGameMode::OnTargetItemPickedUp()
+{
+    OnGameWin();
 }
 
 void AStealthGameMode::SetRandomSeed(const int32 RandomSeed)
@@ -127,4 +133,26 @@ void AStealthGameMode::SpawnGuards(const TArray<TArray<UGuardPatrolPathComponent
 FRandomStream AStealthGameMode::CreateRandomStream(const int32 RandomSeed)
 {
     return FRandomStream(RandomSeed == 0 ? FMath::Rand() : RandomSeed);
+}
+
+void AStealthGameMode::OnGameWin()
+{
+    // Show win widget and pause game
+    UUserWidget* winWidget = CreateWidget(GetWorld(), WinWidget);
+    winWidget->AddToViewport(0);
+
+    PlayerController->SetPause(true);
+    PlayerController->SetInputMode(FInputModeUIOnly());
+    PlayerController->bShowMouseCursor = true;
+}
+
+void AStealthGameMode::OnGameLose()
+{
+    // Show lose widget and pause game
+    UUserWidget* loseWidget = CreateWidget(GetWorld(), LoseWidget);
+    loseWidget->AddToViewport(0);
+
+    PlayerController->SetPause(true);
+    PlayerController->SetInputMode(FInputModeUIOnly());
+    PlayerController->bShowMouseCursor = true;
 }
