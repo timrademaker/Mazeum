@@ -47,7 +47,7 @@ void AGuard::BeginPlay()
 
 void AGuard::StartNextPatrolPath()
 {
-	CurrentTimeAlongPatrolPath = 0.0f;
+	CurrentDistanceAlongPatrolPath = 0.0f;
 	if (NextPatrolPath)
 	{
 		CurrentPatrolPath = NextPatrolPath;
@@ -58,8 +58,8 @@ void AGuard::StartNextPatrolPath()
 			CurrentPatrolPath->SetClosedLoop(true);
 		}
 
-		PatrolSpeed = CurrentPatrolPath->GetSplineLength() / CurrentPatrolPath->PathDuration;
-		SplineAdvancementRate = CurrentPatrolPath->Duration / CurrentPatrolPath->PathDuration;
+		PathLength = CurrentPatrolPath->GetSplineLength();
+		PatrolSpeed = PathLength / CurrentPatrolPath->PathDuration;
 	}
 }
 
@@ -78,10 +78,10 @@ void AGuard::Patrol(float DeltaTime)
 
 	if (ReverseCountDown <= 0.0f)
 	{
-		CurrentTimeAlongPatrolPath += SplineAdvancementRate * DeltaTime * (IsPatrollingBackwards ? -1.0f : 1.0f);
-		CurrentTimeAlongPatrolPath = FMath::Clamp(CurrentTimeAlongPatrolPath, 0.0f, CurrentPatrolPath->Duration);
+		CurrentDistanceAlongPatrolPath += PatrolSpeed * DeltaTime * (IsPatrollingBackwards ? -1.0f : 1.0f);
+		CurrentDistanceAlongPatrolPath = FMath::Clamp(CurrentDistanceAlongPatrolPath, 0.0f, PathLength);
 
-		const FVector targetPosition = CurrentPatrolPath->GetLocationAtTime(CurrentTimeAlongPatrolPath, ESplineCoordinateSpace::World);
+		const FVector targetPosition = CurrentPatrolPath->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongPatrolPath, ESplineCoordinateSpace::World);
 		
 		// Move the guard
 		FVector movementDirection = targetPosition - GetActorLocation();
@@ -89,12 +89,12 @@ void AGuard::Patrol(float DeltaTime)
 		AddMovementInput(PatrolSpeed * DeltaTime * movementDirection);
 
 		// Check if we reached the end of the spline in either direction
-		if (CurrentTimeAlongPatrolPath >= CurrentPatrolPath->Duration || CurrentTimeAlongPatrolPath <= 0.0f)
+		if (CurrentDistanceAlongPatrolPath >= PathLength || CurrentDistanceAlongPatrolPath <= 0.0f)
 		{
 			if (CurrentPatrolPath->IsClosedLoop())
 			{
 				// Set this back to 0, as we're not reversing along the spline.
-				CurrentTimeAlongPatrolPath = 0.0f;
+				CurrentDistanceAlongPatrolPath = 0.0f;
 			}
 			else
 			{
@@ -102,7 +102,7 @@ void AGuard::Patrol(float DeltaTime)
 				IsPatrollingBackwards = !IsPatrollingBackwards;
 			}
 
-			if (CurrentTimeAlongPatrolPath == 0.0f)
+			if (CurrentDistanceAlongPatrolPath == 0.0f)
 			{
 				StartNextPatrolPath();
 			}
@@ -116,7 +116,7 @@ void AGuard::Patrol(float DeltaTime)
 
 bool AGuard::GuardCanSeePlayer()
 {
-	if ((GetActorLocation() - PlayerPawn->GetActorLocation()).SizeSquared() > VisionRange* VisionRange)
+	if ((GetActorLocation() - PlayerPawn->GetActorLocation()).SizeSquared() > VisionRange * VisionRange)
 	{
 		return false;
 	}

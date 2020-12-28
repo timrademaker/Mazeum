@@ -61,11 +61,11 @@ private:
 
 	/** The speed at which the guard moves */
 	float PatrolSpeed = 0.0f;
-	/** How far the guard moves along the spline per second, in spline time */
-	float SplineAdvancementRate = 0.0f;
+	/** The length of the current patrol path */
+	float PathLength = 0.0f;
 
 	/** How far the guard is along the current path */
-	float CurrentTimeAlongPatrolPath = 0.0f;
+	float CurrentDistanceAlongPatrolPath = 0.0f;
 	/** The time until the guard starts moving again afer reaching the end of the path */
 	float ReverseCountDown = 0.0f;
 	/** True if the guard is on its way back to the start of its path */
