@@ -32,7 +32,7 @@ protected:
 
 private:
 	void UpdateCameraTargetPosition(float DeltaTime);
-	/// Returns true if the camera is able to see the player
+	/** Returns true if the camera is able to see the player */
 	bool CameraHasSpottedPlayer();
 
 public:

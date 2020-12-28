@@ -5,6 +5,7 @@
 
 #include "AlarmComponent.h"
 
+#include "Components/ArrowComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -28,6 +29,9 @@ ASecurityCamera::ASecurityCamera()
 
 	CameraAreaDecal = CreateDefaultSubobject<UDecalComponent>("CameraViewDecal");
 	CameraAreaDecal->SetupAttachment(RootComponent);
+
+	UArrowComponent* arrowComponent = CreateDefaultSubobject<UArrowComponent>("CameraForward");
+	arrowComponent->SetupAttachment(RootComponent);
 
 	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
 
@@ -86,7 +90,11 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 
 bool ASecurityCamera::CameraHasSpottedPlayer()
 {
-	const FVector traceStart = GetActorLocation();
+	FVector actorOrigin;
+	FVector actorExtent;
+	GetActorBounds(true, actorOrigin, actorExtent);
+
+	const FVector traceStart = actorOrigin + GetActorForwardVector() * FVector(actorExtent.X, actorExtent.Y, 0.0f);
 	const FVector traceEnd = PathSpline->GetLocationAtTime(CurrentSplineTime, ESplineCoordinateSpace::World);
 	const FQuat traceRotaton = UKismetMathLibrary::FindLookAtRotation(traceStart, traceEnd).Quaternion();
 	FHitResult hitResult;
