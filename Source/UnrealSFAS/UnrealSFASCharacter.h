@@ -54,11 +54,24 @@ protected:
 	/** Called via input when the player tries to drop their held item */
 	void OnDropHeldItem();
 
+	/** Called via input when the player tries to crouch */
+	void OnCrouch();
+	/** Called via input when the player tries to stop crouching */
+	void OnUnCrouch();
+
 protected:
-	// APawn interface
+	// AActor interface
 	virtual void BeginPlay() override;
+	// End of AActor interface
+
+	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	// ACharacter interface
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	//End of ACharacter interface
 
 private:
 	/**

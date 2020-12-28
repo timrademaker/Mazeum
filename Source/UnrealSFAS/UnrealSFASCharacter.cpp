@@ -60,6 +60,22 @@ void AUnrealSFASCharacter::BeginPlay()
 	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UInteractableInterface::StaticClass(), Interactables);
 }
 
+void AUnrealSFASCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	// Placeholder until I add animations
+	GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 0.5f));
+}
+
+void AUnrealSFASCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	// Placeholder until I add animations
+	GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -91,6 +107,10 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// Interaction with items
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AUnrealSFASCharacter::OnInteract);
 	PlayerInputComponent->BindAction("DropHeldItem", IE_Pressed, this, &AUnrealSFASCharacter::OnDropHeldItem);
+
+	// Crouching
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AUnrealSFASCharacter::OnCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AUnrealSFASCharacter::OnUnCrouch);
 }
 
 float AUnrealSFASCharacter::CalculateMovementSpeedModifier() const
@@ -161,6 +181,16 @@ void AUnrealSFASCharacter::OnDropHeldItem()
 		HeldItem->DropItem();
 		HeldItem = nullptr;
 	}
+}
+
+void AUnrealSFASCharacter::OnCrouch()
+{
+	Crouch();
+}
+
+void AUnrealSFASCharacter::OnUnCrouch()
+{
+	UnCrouch();
 }
 
 void AUnrealSFASCharacter::TurnAtRate(float Rate)
