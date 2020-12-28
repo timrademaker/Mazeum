@@ -14,6 +14,9 @@ class UNREALSFAS_API UGuardPatrolPathComponent : public USplineComponent
 	GENERATED_BODY()
 
 public:
+	UGuardPatrolPathComponent();
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path", meta = (ToolTip = "The likelihood of this guard path to be chosen over another path. Higher means a bigger chance.", ClampMin = "1"))
 	uint8 PathWeight = 1;
 
