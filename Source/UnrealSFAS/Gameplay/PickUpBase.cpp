@@ -25,6 +25,8 @@ void APickUpBase::PickUpItem(const AActor* PickedUpBy)
 
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
+
+	ItemPickedUpDelegate.Broadcast();
 }
 
 void APickUpBase::DropItem()

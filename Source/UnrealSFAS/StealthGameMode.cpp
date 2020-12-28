@@ -6,6 +6,7 @@
 #include "Gameplay/AlarmComponent.h"
 #include "Gameplay/Guard.h"
 #include "Gameplay/GuardPatrolPath.h"
+#include "Gameplay/PickUpBase.h"
 
 #include "Blueprint/UserWidget.h"
 #include "Components/SplineComponent.h"
@@ -36,7 +37,7 @@ void AStealthGameMode::StartPlay()
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), worldActors);
 
         // Subscribe to all alarm events
-        for (const auto* actor : worldActors)
+        for (const AActor* actor : worldActors)
         {
             UActorComponent* alarmComponent = actor->GetComponentByClass(UAlarmComponent::StaticClass());
 
@@ -44,6 +45,17 @@ void AStealthGameMode::StartPlay()
             {
                 Cast<UAlarmComponent>(alarmComponent)->OnAlarmTriggered().AddUObject(this, &AStealthGameMode::OnAlarmTriggered);
             }
+        }
+    }
+
+    {
+        TArray<AActor*> pickups;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickUpBase::StaticClass(), pickups);
+
+        // Subscribe to all pick-up events
+        for (AActor* pickup : pickups)
+        {
+                Cast<APickUpBase>(pickup)->OnItemPickedUp().AddUObject(this, &AStealthGameMode::OnTargetItemPickedUp);
         }
     }
 
