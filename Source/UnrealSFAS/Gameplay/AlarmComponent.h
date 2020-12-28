@@ -18,10 +18,12 @@ public:
 	// Sets default values for this component's properties
 	UAlarmComponent();
 
+	/** Trigger the alarm and send out an event */
 	UFUNCTION(BlueprintCallable)
-	void TriggerAlarm() { AlarmTriggeredDelegate.Broadcast(); }
+	void TriggerAlarm() const { AlarmTriggeredDelegate.Broadcast(); }
 
-	FAlarmTriggered& OnAlarmTriggered() { return AlarmTriggeredDelegate; }
+	/** Delegate for when the alarm is triggered */
+	FORCEINLINE FAlarmTriggered& OnAlarmTriggered() { return AlarmTriggeredDelegate; }
 
 
 private:
