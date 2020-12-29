@@ -23,9 +23,13 @@ public:
 
     UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Tooltip = "Get the scaled size of a single vent block"))
     static FVector GetVentBlockSize();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Tooltip = "Get the scale of the vent blocks"))
+    static FVector GetVentBlockScale();
 	
 private:
     static FVector BlockDimensions;
     static FVector BlockScale;
+    static FVector VentBlockScale;
     static float VentHeight;
 };

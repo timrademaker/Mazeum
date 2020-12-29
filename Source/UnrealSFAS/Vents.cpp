@@ -58,14 +58,13 @@ void AVents::PlaceVents(const FMapGrid* Grid)
 	if (VentMesh)
 	{
 		const FVector ventBlockSize = UConstantsFunctionLibrary::GetVentBlockSize();
-		const float blockZPos = GetActorLocation().Z - (0.5f * ventBlockSize.Z);
+		const float blockZPos = GetActorLocation().Z - (0.5f * ventBlockSize.Z) - 1.0f;
 
 		FVector2D blockPos(0.0f);
 		FIntPoint mazeSize(Grid->GetWidth(), Grid->GetDepth());
 
 		const FQuat worldRotation(FVector(0.0f, 0.0f, 1.0f), 0.0f);
-		//const FVector worldScale = UConstantsFunctionLibrary::GetBlockScale();
-		const FVector worldScale = FVector(2.0f, 2.0f, 1.0f);
+		const FVector worldScale = UConstantsFunctionLibrary::GetVentBlockScale();
 
 		USceneComponent* rootComponent = GetRootComponent();
 
@@ -87,7 +86,6 @@ void AVents::PlaceVents(const FMapGrid* Grid)
 				}
 
 				UStaticMeshComponent* meshComponent = NewObject<UStaticMeshComponent>(this);
-				//FVector worldPosition(blockPos, blockZPos);
 				FTransform worldXForm(worldRotation, worldPosition, worldScale);
 
 				meshComponent->SetStaticMesh(VentMesh);
