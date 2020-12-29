@@ -17,8 +17,15 @@ class UNREALSFAS_API UConstantsFunctionLibrary : public UBlueprintFunctionLibrar
 public:
     UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Tooltip = "Get the scaled size of a single block"))
     static FVector GetBlockSize();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Tooltip = "Get the scale of the blocks"))
+    static FVector GetBlockScale();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Tooltip = "Get the scaled size of a single vent block"))
+    static FVector GetVentBlockSize();
 	
 private:
     static FVector BlockDimensions;
     static FVector BlockScale;
+    static float VentHeight;
 };
