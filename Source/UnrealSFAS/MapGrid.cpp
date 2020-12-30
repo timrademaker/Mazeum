@@ -17,6 +17,12 @@ FMapGrid::~FMapGrid()
 
 void FMapGrid::Set(unsigned int X, unsigned int Y, bool IsOccupied)
 {
+    if (X < 0 || X >= Width || Y < 0 || Y >= Depth)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Tried to set a grid point outside of the grid"));
+        return;
+    }
+
     uint32 mask = (1 << (Width - 1 - X));
 
     if (IsOccupied)
@@ -31,11 +37,22 @@ void FMapGrid::Set(unsigned int X, unsigned int Y, bool IsOccupied)
 
 void FMapGrid::SetRow(unsigned int Y, const uint32 Row)
 {
+    if (Y < 0 || Y >= Depth)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Tried to set a grid point outside of the grid"));
+        return;
+    }
+
     Grid[Y] = Row;
 }
 
 bool FMapGrid::IsEmpty(unsigned int X, unsigned int Y) const
 {
+    if (X < 0 || X >= Width|| Y < 0 || Y >= Depth)
+    {
+        return true;
+    }
+
     return ((Grid[Y] >> (Width - 1 - X)) & 1) == 0;
 }
 
