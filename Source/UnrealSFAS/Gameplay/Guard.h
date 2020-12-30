@@ -35,6 +35,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void Reset() override;
+
 private:
 	/** Start the guard's next patrol path, if there is one. */
 	void StartNextPatrolPath();
@@ -73,7 +75,7 @@ private:
 	bool IsPatrollingBackwards = false;
 
 	/** The cosine of half of the guard's field of view, used to determine if the guard can see an actor */
-	float FieldOfViewHalfCosine = 0.0f;
+	float HalfFieldOfViewCosine = 0.0f;
 	/** The parameters used to check if an actor can be seen */
 	FCollisionQueryParams CollisionQueryParams;
 

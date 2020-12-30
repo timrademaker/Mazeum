@@ -15,13 +15,20 @@ public:
     AStealthGameMode();
 
     virtual void StartPlay() override;
+    virtual void ResetLevel() override;
 
     /** 
      * Register an array of guard patrol path components that are part of a room or section of the level
      * @param PatrolPaths An array of patrol path components, of which one is used when spawning a guard
      */
     void RegisterGuardPatrolPathArray(TArray<class UGuardPatrolPathComponent*>* const PatrolPaths);
-	
+
+    /**
+     * Pause or unpause the game
+     * @param NewPauseState If true, the game will be paused.
+     */
+    UFUNCTION(BlueprintCallable, meta = (Keywords = "Pause Unpause", ToolTip = "Pause or unpause the game"))
+    void SetPauseState(bool NewPauseState);
 
 protected:
     /** Callback for alarm components when the player is spotted */
@@ -82,5 +89,8 @@ private:
     TArray<TArray<class UGuardPatrolPathComponent*>*> PatrolPathArrays;
 
     /** The player's PlayerController */
-    APlayerController* PlayerController;
+    APlayerController* PlayerController = nullptr;
+
+    /** The widget that is displayed when the game ended */
+    UUserWidget* GameResultWidget = nullptr;
 };

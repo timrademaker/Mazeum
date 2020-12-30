@@ -130,3 +130,11 @@ void ASecurityCamera::OnConstruction(const FTransform& Transform)
 	CameraAreaDecal->DecalSize = FVector(CameraVisionRadius);
 }
 
+void ASecurityCamera::Reset()
+{
+	Super::Reset();
+
+	CurrentSplineTime = 0.0f;
+	UpdateCameraTargetPosition(0.0f);
+}
+

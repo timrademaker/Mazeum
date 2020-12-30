@@ -56,8 +56,10 @@ void AUnrealSFASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Find all actors implementing an interface
+	// Find all actors implementing an interface indicating that the player can interact with the actor
 	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UInteractableInterface::StaticClass(), Interactables);
+
+	StartTransform = GetActorTransform();
 }
 
 void AUnrealSFASCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -125,6 +127,11 @@ float AUnrealSFASCharacter::CalculateMovementSpeedModifier() const
 		const float modifier = 1.0f - weight / MaximumItemWeight;
 		return FMath::Clamp(modifier, MinimumMovementSpeedModifier, 1.0f);
 	}
+}
+
+void AUnrealSFASCharacter::Reset()
+{
+	SetActorTransform(StartTransform);
 }
 
 void AUnrealSFASCharacter::OnResetVR()

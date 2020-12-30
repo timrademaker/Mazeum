@@ -44,6 +44,18 @@ void AGuard::BeginPlay()
 	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
 }
 
+void AGuard::Reset()
+{
+	Super::Reset();
+
+	if (CurrentPatrolPath)
+	{
+		SetActorLocation(CurrentPatrolPath->GetLocationAtTime(0.0f, ESplineCoordinateSpace::World));
+		NextPatrolPath = CurrentPatrolPath;
+		StartNextPatrolPath();
+	}
+}
+
 void AGuard::StartNextPatrolPath()
 {
 	CurrentDistanceAlongPatrolPath = 0.0f;
@@ -61,7 +73,7 @@ void AGuard::StartNextPatrolPath()
 		PatrolSpeed = PathLength / CurrentPatrolPath->PathDuration;
 	}
 
-	FieldOfViewHalfCosine = FMath::Cos(FMath::DegreesToRadians(FieldOfView) / 2.0f);
+	HalfFieldOfViewCosine = FMath::Cos(FMath::DegreesToRadians(FieldOfView / 2.0f));
 }
 
 void AGuard::Patrol(float DeltaTime)
@@ -138,7 +150,7 @@ bool AGuard::GuardCanSeeActor(const AActor* TargetActor)
 	const float directionForwardDot = FVector::DotProduct(guardForward, directionToActor);
 
 	// Check if the actor is within the guard's field of view
-	if (directionForwardDot >= FieldOfViewHalfCosine)
+	if (directionForwardDot >= HalfFieldOfViewCosine)
 	{
 		// Check if the actor is behind a wall
 		FHitResult hitResult;
@@ -149,7 +161,6 @@ bool AGuard::GuardCanSeeActor(const AActor* TargetActor)
 				return false;
 			}
 		}
-		UE_LOG(LogTemp, Log, TEXT("%s %f"), TEXT("Spotted player with dot"), directionForwardDot);
 		return true;
 	}
 

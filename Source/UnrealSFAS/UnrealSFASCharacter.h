@@ -14,6 +14,8 @@ class AUnrealSFASCharacter : public ACharacter
 public:
 	AUnrealSFASCharacter();
 
+	virtual void Reset() override;
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -115,5 +117,8 @@ private:
 
 	/** The item the player is holding */
 	class APickUpBase* HeldItem;
+
+	/** The transform of the character when the game starts */
+	FTransform StartTransform;
 };
 

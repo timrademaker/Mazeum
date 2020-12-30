@@ -69,11 +69,42 @@ void AStealthGameMode::StartPlay()
     PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
+void AStealthGameMode::ResetLevel()
+{
+    APawn* playerPawn = PlayerController->GetPawn();
+
+    Super::ResetLevel();
+
+
+    SetPauseState(false);
+    PlayerController->Possess(playerPawn);
+    
+    if (GameResultWidget)
+    {
+        GameResultWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
 void AStealthGameMode::RegisterGuardPatrolPathArray(TArray<UGuardPatrolPathComponent*>* const PatrolPaths)
 {
     if (PatrolPaths->Num() > 0)
     {
         PatrolPathArrays.Add(PatrolPaths);
+    }
+}
+
+void AStealthGameMode::SetPauseState(bool NewPauseState)
+{
+    PlayerController->SetPause(NewPauseState);
+    PlayerController->bShowMouseCursor = NewPauseState;
+    
+    if (NewPauseState)
+    {
+        PlayerController->SetInputMode(FInputModeUIOnly());
+    }
+    else
+    {
+        PlayerController->SetInputMode(FInputModeGameOnly());
     }
 }
 
@@ -162,21 +193,31 @@ FRandomStream AStealthGameMode::CreateRandomStream(const int32 RandomSeed)
 void AStealthGameMode::OnGameWin()
 {
     // Show win widget and pause game
-    UUserWidget* winWidget = CreateWidget(GetWorld(), WinWidget);
-    winWidget->AddToViewport(0);
+    if (!GameResultWidget)
+    {
+        GameResultWidget = CreateWidget(GetWorld(), WinWidget);
+        GameResultWidget->AddToViewport(0);
+    }
+    else
+    {
+        GameResultWidget->SetVisibility(ESlateVisibility::Visible);
+    }
 
-    PlayerController->SetPause(true);
-    PlayerController->SetInputMode(FInputModeUIOnly());
-    PlayerController->bShowMouseCursor = true;
+    SetPauseState(true);
 }
 
 void AStealthGameMode::OnGameLose()
 {
     // Show lose widget and pause game
-    UUserWidget* loseWidget = CreateWidget(GetWorld(), LoseWidget);
-    loseWidget->AddToViewport(0);
+    if (!GameResultWidget)
+    {
+        GameResultWidget = CreateWidget(GetWorld(), LoseWidget);
+        GameResultWidget->AddToViewport(0);
+    }
+    else
+    {
+        GameResultWidget->SetVisibility(ESlateVisibility::Visible);
+    }
 
-    PlayerController->SetPause(true);
-    PlayerController->SetInputMode(FInputModeUIOnly());
-    PlayerController->bShowMouseCursor = true;
+    SetPauseState(true);
 }
