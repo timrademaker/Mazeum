@@ -29,6 +29,7 @@ ASecurityCamera::ASecurityCamera()
 
 	CameraAreaDecal = CreateDefaultSubobject<UDecalComponent>("CameraViewDecal");
 	CameraAreaDecal->SetupAttachment(RootComponent);
+	CameraAreaDecal->SetWorldRotation(FRotator(90.0f, 0.0f, 0.0f));
 
 	UArrowComponent* arrowComponent = CreateDefaultSubobject<UArrowComponent>("CameraForward");
 	arrowComponent->SetupAttachment(RootComponent);
@@ -72,7 +73,9 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 		// Update decal size
 		const float distanceToTargetPosition = CurrentCameraRange;
 		const float decalDiameter = distanceToTargetPosition * HalfFieldOfViewTangent * 2.0f;
-		CameraAreaDecal->DecalSize = FVector(decalDiameter, decalDiameter, 50.0f);
+		CameraAreaDecal->DecalSize = FVector(decalDiameter);
+		// Rotate decal based on camera direction
+		CameraAreaDecal->SetWorldRotation(FRotator(90.0f, UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), targetPosition).Yaw, 0.0f));
 
 		// Check if we reached the end of the spline in either direction
 		if (CurrentDistanceAlongSpline >= SplineLength || CurrentDistanceAlongSpline <= 0.0f)
