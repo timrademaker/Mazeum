@@ -42,22 +42,23 @@ private:
 	/** Move the guard along its path */
 	void Patrol(float DeltaTime);
 
-	/** Check if the guard can see the player
-	 * @returns True if the guard is able to see the player
+	/** Check if the guard can see an actor
+	 * @param Actor The actor for which to check if the guard is able to see it
+	 * @returns True if the guard is able to see the actor
 	 */
-	bool GuardCanSeePlayer();
+	bool GuardCanSeeActor(const AActor* Actor);
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The radius of the capsule which the guard uses as its vision capsule", ClampMin = "0.0"))
-	float VisionRadius = 50.0f;
+	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The guard's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
+	float FieldOfView = 75.0f;
 	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The range at which the guard can spot the player", ClampMin = "0.0"))
 	float VisionRange = 500.0f;
 
 private:
 	/** The path the guard is currently patrolling */
-	UGuardPatrolPathComponent* CurrentPatrolPath;
+	UGuardPatrolPathComponent* CurrentPatrolPath = nullptr;
 	/** The path the guard will patrol after the current path is done */
-	UGuardPatrolPathComponent* NextPatrolPath;
+	UGuardPatrolPathComponent* NextPatrolPath = nullptr;
 
 	/** The speed at which the guard moves */
 	float PatrolSpeed = 0.0f;
@@ -71,13 +72,13 @@ private:
 	/** True if the guard is on its way back to the start of its path */
 	bool IsPatrollingBackwards = false;
 
-	/** The shape to use as the guard's detection */
-	FCollisionShape VisionCollisionShape;
-	/** The parameters used for the guard's vision */
+	/** The cosine of half of the guard's field of view, used to determine if the guard can see an actor */
+	float FieldOfViewHalfCosine = 0.0f;
+	/** The parameters used to check if an actor can be seen */
 	FCollisionQueryParams CollisionQueryParams;
 
 	/** The player's pawn */
-	APawn* PlayerPawn;
+	APawn* PlayerPawn = nullptr;
 	/** The guard's alarm component */
-	UAlarmComponent* AlarmComponent;
+	UAlarmComponent* AlarmComponent = nullptr;
 };

@@ -21,7 +21,6 @@ AGuard::AGuard()
 
 	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
 
-	VisionCollisionShape.SetCapsule(VisionRadius, 50.0f);
 	CollisionQueryParams.AddIgnoredActor(this);
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -61,6 +60,8 @@ void AGuard::StartNextPatrolPath()
 		PathLength = CurrentPatrolPath->GetSplineLength();
 		PatrolSpeed = PathLength / CurrentPatrolPath->PathDuration;
 	}
+
+	FieldOfViewHalfCosine = FMath::Cos(FMath::DegreesToRadians(FieldOfView) / 2.0f);
 }
 
 void AGuard::Patrol(float DeltaTime)
@@ -114,24 +115,42 @@ void AGuard::Patrol(float DeltaTime)
 	}
 }
 
-bool AGuard::GuardCanSeePlayer()
+bool AGuard::GuardCanSeeActor(const AActor* TargetActor)
 {
-	if ((GetActorLocation() - PlayerPawn->GetActorLocation()).SizeSquared() > VisionRange * VisionRange)
+	if (!TargetActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Passed a nullptr to GuardCanSeeActor"));
+		return false;
+	}
+
+	const FVector ownLocation = GetActorLocation();
+	const FVector targetLocation = TargetActor->GetActorLocation();
+
+	// Check if the actor is in the guard's range
+	if ((targetLocation - ownLocation).SizeSquared() > VisionRange * VisionRange)
 	{
 		return false;
 	}
 
-	const FVector traceStart = GetActorLocation();
-	const FVector traceEnd = traceStart + GetActorForwardVector() * VisionRange;
-	const FQuat traceRotaton = UKismetMathLibrary::FindLookAtRotation(traceStart, traceEnd).Quaternion();
-	FHitResult hitResult;
+	const FVector guardForward = GetActorForwardVector();
+	const FVector directionToActor = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, targetLocation);
+	
+	const float directionForwardDot = FVector::DotProduct(guardForward, directionToActor);
 
-	if (GetWorld()->SweepSingleByChannel(hitResult, traceStart, traceEnd, traceRotaton, ECollisionChannel::ECC_Camera, VisionCollisionShape, CollisionQueryParams))
+	// Check if the actor is within the guard's field of view
+	if (directionForwardDot >= FieldOfViewHalfCosine)
 	{
-		if (hitResult.GetActor() == PlayerPawn)
+		// Check if the actor is behind a wall
+		FHitResult hitResult;
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, ownLocation, targetLocation, ECollisionChannel::ECC_Camera, CollisionQueryParams))
 		{
-			return true;
+			if (hitResult.Actor != PlayerPawn)
+			{
+				return false;
+			}
 		}
+		UE_LOG(LogTemp, Log, TEXT("%s %f"), TEXT("Spotted player with dot"), directionForwardDot);
+		return true;
 	}
 
 	return false;
@@ -144,7 +163,7 @@ void AGuard::Tick(float DeltaTime)
 
 	Patrol(DeltaTime);
 	
-	if (GuardCanSeePlayer())
+	if (GuardCanSeeActor(PlayerPawn))
 	{
 		AlarmComponent->TriggerAlarm();
 	}
