@@ -3,7 +3,7 @@
 
 #include "ConstantsFunctionLibrary.h"
 
-FVector UConstantsFunctionLibrary::BlockDimensions = FVector(200.0f, 200.0f, 300.0f);
+FVector UConstantsFunctionLibrary::BlockDimensions = FVector(200.0f, 200.0f, 400.0f);
 FVector UConstantsFunctionLibrary::BlockScale = FVector(1.0f);
 FVector UConstantsFunctionLibrary::VentBlockScale = FVector(2.0f, 2.0f, 1.2f);
 float UConstantsFunctionLibrary::VentHeight = 120.0f;
