@@ -35,11 +35,10 @@ ASecurityCamera::ASecurityCamera()
 
 	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
 
-	CameraAreaDecal->DecalSize = FVector(CameraVisionRadius);
-
-	VisionCollisionShape.SetCapsule(CameraVisionRadius, 50.0f);
-
 	CollisionQueryParams.AddIgnoredActor(this);
+
+	HalfFieldOfViewCosine  = FMath::Cos(FMath::DegreesToRadians(FieldOfView / 2.0f));
+	HalfFieldOfViewTangent = FMath::Tan(FMath::DegreesToRadians(FieldOfView / 2.0f));
 }
 
 // Called when the game starts or when spawned
@@ -52,7 +51,8 @@ void ASecurityCamera::BeginPlay()
 		PathSpline->SetClosedLoop(true);
 	}
 
-	CameraMovementSpeed = PathSpline->Duration / SplinePathDuration;
+	SplineLength = PathSpline->GetSplineLength();
+	CameraMovementSpeed = SplineLength / SplinePathDuration;
 
 	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
 }
@@ -61,19 +61,26 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 {
 	if (ReverseCountDown <= 0.0f)
 	{
-		CurrentSplineTime += CameraMovementSpeed * DeltaTime * (IsMovingBackToSplineStart ? -1.0f : 1.0f);
-		CurrentSplineTime = FMath::Clamp(CurrentSplineTime, 0.0f, PathSpline->Duration);
+		CurrentDistanceAlongSpline += CameraMovementSpeed * DeltaTime * (IsMovingBackToSplineStart ? -1.0f : 1.0f);
+		CurrentDistanceAlongSpline = FMath::Clamp(CurrentDistanceAlongSpline, 0.0f, SplineLength);
 
-		const FVector targetPosition = PathSpline->GetLocationAtTime(CurrentSplineTime, ESplineCoordinateSpace::World);
+		const FVector targetPosition = PathSpline->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World);
 		CameraAreaDecal->SetWorldLocation(targetPosition);
 
+		CurrentCameraRange = (targetPosition - GetActorLocation()).Size() * HalfFieldOfViewCosine;
+
+		// Update decal size
+		const float distanceToTargetPosition = CurrentCameraRange;
+		const float decalDiameter = distanceToTargetPosition * HalfFieldOfViewTangent * 2.0f;
+		CameraAreaDecal->DecalSize = FVector(decalDiameter, decalDiameter, 50.0f);
+
 		// Check if we reached the end of the spline in either direction
-		if (CurrentSplineTime >= PathSpline->Duration || CurrentSplineTime <= 0.0f)
+		if (CurrentDistanceAlongSpline >= SplineLength || CurrentDistanceAlongSpline <= 0.0f)
 		{
 			if (PathSpline->IsClosedLoop())
 			{
 				// Set this back to 0, as we're not reversing along the spline.
-				CurrentSplineTime = 0.0f;
+				CurrentDistanceAlongSpline = 0.0f;
 			}
 			else
 			{
@@ -88,23 +95,38 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 	}
 }
 
-bool ASecurityCamera::CameraHasSpottedPlayer()
+bool ASecurityCamera::CameraCanSeeActor(const AActor* TargetActor)
 {
-	FVector actorOrigin;
-	FVector actorExtent;
-	GetActorBounds(true, actorOrigin, actorExtent);
-
-	const FVector traceStart = actorOrigin + GetActorForwardVector() * FVector(actorExtent.X, actorExtent.Y, 0.0f);
-	const FVector traceEnd = PathSpline->GetLocationAtTime(CurrentSplineTime, ESplineCoordinateSpace::World);
-	const FQuat traceRotaton = UKismetMathLibrary::FindLookAtRotation(traceStart, traceEnd).Quaternion();
-	FHitResult hitResult;
-
-	if (GetWorld()->SweepSingleByChannel(hitResult, traceStart, traceEnd, traceRotaton, ECollisionChannel::ECC_Camera, VisionCollisionShape, CollisionQueryParams))
+	if (!TargetActor)
 	{
-		if (hitResult.GetActor() == PlayerPawn)
+		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Passed a nullptr to CameraCanSeeActor"));
+		return false;
+	}
+
+	const FVector ownLocation = GetActorLocation();
+	const FVector targetLocation = TargetActor->GetActorLocation();
+
+	if ((targetLocation - ownLocation).SizeSquared() > CurrentCameraRange * CurrentCameraRange)
+	{
+		return false;
+	}
+
+	const FVector cameraForward = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, PathSpline->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World));
+	const FVector directionToActor = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, targetLocation);
+
+	const float directionForwardDot = FVector::DotProduct(cameraForward, directionToActor);
+	if (directionForwardDot >= HalfFieldOfViewCosine)
+	{
+		// Check if the actor is behind a wall
+		FHitResult hitResult;
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, ownLocation, targetLocation, ECollisionChannel::ECC_Camera, CollisionQueryParams))
 		{
-			return true;
+			if (hitResult.Actor != PlayerPawn)
+			{
+				return false;
+			}
 		}
+		return true;
 	}
 
 	return false;
@@ -117,7 +139,7 @@ void ASecurityCamera::Tick(float DeltaTime)
 
 	UpdateCameraTargetPosition(DeltaTime);
 
-	if (CameraHasSpottedPlayer())
+	if (CameraCanSeeActor(PlayerPawn))
 	{
 		AlarmComponent->TriggerAlarm();
 	}
@@ -127,14 +149,13 @@ void ASecurityCamera::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	CameraAreaDecal->DecalSize = FVector(CameraVisionRadius);
+	UpdateCameraTargetPosition(0.0f);
 }
 
 void ASecurityCamera::Reset()
 {
 	Super::Reset();
 
-	CurrentSplineTime = 0.0f;
+	CurrentDistanceAlongSpline = 0.0f;
 	UpdateCameraTargetPosition(0.0f);
 }
-
