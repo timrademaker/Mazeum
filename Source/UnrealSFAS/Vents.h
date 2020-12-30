@@ -13,17 +13,12 @@ class UNREALSFAS_API AVents : public AActor
 	
 public:
 	AVents();
-	~AVents();
 
-	void SetVentGrid(class FMapGrid* Grid);
+	/** Place vents based on a grid */
+	void PlaceVents(const class FMapGrid& Grid);
 
 protected:
 	virtual void BeginPlay() override;
-
-private:
-	FMapGrid* CreatePlaceholderVents();
-	void PlaceVents(const FMapGrid* Grid);
-
 
 public:
 	UPROPERTY(EditDefaultsOnly)
@@ -31,7 +26,4 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UMaterialInterface* VentMaterial = nullptr;
-
-private:
-	class FMapGrid* VentGrid;
 };
