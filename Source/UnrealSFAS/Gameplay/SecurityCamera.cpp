@@ -8,6 +8,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -30,6 +31,12 @@ ASecurityCamera::ASecurityCamera()
 	CameraAreaDecal = CreateDefaultSubobject<UDecalComponent>("CameraViewDecal");
 	CameraAreaDecal->SetupAttachment(RootComponent);
 	CameraAreaDecal->SetWorldRotation(FRotator(90.0f, 0.0f, 0.0f));
+
+	SpotLight = CreateDefaultSubobject <USpotLightComponent>("SpotLight");
+	SpotLight->SetupAttachment(RootComponent);
+	SpotLight->bUseInverseSquaredFalloff = false;
+	SpotLight->SetLightFalloffExponent(8.0f);
+	SpotLight->SetIntensity(50.0f);
 
 	UArrowComponent* arrowComponent = CreateDefaultSubobject<UArrowComponent>("CameraForward");
 	arrowComponent->SetupAttachment(RootComponent);
@@ -75,7 +82,11 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 		const float decalDiameter = distanceToTargetPosition * HalfFieldOfViewTangent * 2.0f;
 		CameraAreaDecal->DecalSize = FVector(decalDiameter);
 		// Rotate decal based on camera direction
-		CameraAreaDecal->SetWorldRotation(FRotator(90.0f, UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), targetPosition).Yaw, 0.0f));
+		FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), targetPosition);
+		CameraAreaDecal->SetWorldRotation(FRotator(90.0f, targetRotation.Yaw, 0.0f));
+		// Rotate spotlight
+		SpotLight->SetWorldRotation(targetRotation);
+		SpotLight->SetAttenuationRadius(2.0f * CurrentCameraRange);
 
 		// Check if we reached the end of the spline in either direction
 		if (CurrentDistanceAlongSpline >= SplineLength || CurrentDistanceAlongSpline <= 0.0f)
@@ -153,6 +164,8 @@ void ASecurityCamera::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	UpdateCameraTargetPosition(0.0f);
+	SpotLight->SetOuterConeAngle(FieldOfView);
+	SpotLight->SetInnerConeAngle(FieldOfView);
 }
 
 void ASecurityCamera::Reset()

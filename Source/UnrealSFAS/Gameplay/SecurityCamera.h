@@ -55,6 +55,8 @@ public:
 	USplineComponent* PathSpline;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* CameraMesh;	// Will probably be changed to a different type later on, if the camera needs to rotate
+	UPROPERTY(EditDefaultsOnly)
+	class USpotLightComponent* SpotLight;
 	
 private:
 	/** The player's pawn */
