@@ -3,6 +3,7 @@
 #include "UnrealSFASCharacter.h"
 
 #include "InteractableInterface.h"
+#include "StealthGameMode.h"
 #include "Gameplay/PickUpBase.h"
 
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -113,6 +114,10 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// Crouching
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AUnrealSFASCharacter::OnCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AUnrealSFASCharacter::OnUnCrouch);
+
+	// Pausing
+	FInputActionBinding& pauseToggle = PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AUnrealSFASCharacter::OnPause);
+	pauseToggle.bExecuteWhenPaused = true;
 }
 
 float AUnrealSFASCharacter::CalculateMovementSpeedModifier() const
@@ -198,6 +203,15 @@ void AUnrealSFASCharacter::OnCrouch()
 void AUnrealSFASCharacter::OnUnCrouch()
 {
 	UnCrouch();
+}
+
+void AUnrealSFASCharacter::OnPause()
+{
+	AStealthGameMode* gm = Cast<AStealthGameMode>(GetWorld()->GetAuthGameMode());
+	if (gm)
+	{
+		gm->TogglePause();
+	}
 }
 
 void AUnrealSFASCharacter::TurnAtRate(float Rate)

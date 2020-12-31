@@ -61,6 +61,9 @@ protected:
 	/** Called via input when the player tries to stop crouching */
 	void OnUnCrouch();
 
+	/**	Called via input when the player tries to (un)pause the game */
+	void OnPause();
+
 protected:
 	// AActor interface
 	virtual void BeginPlay() override;

@@ -79,9 +79,19 @@ void AStealthGameMode::ResetLevel()
     SetPauseState(false);
     PlayerController->Possess(playerPawn);
     
-    if (GameResultWidget)
+    if (WinWidgetInstance)
     {
-        GameResultWidget->SetVisibility(ESlateVisibility::Hidden);
+        WinWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (LoseWidgetInstance)
+    {
+        LoseWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (PauseWidgetInstance)
+    {
+        PauseWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 
@@ -98,6 +108,7 @@ void AStealthGameMode::SetPauseState(bool NewPauseState)
     PlayerController->SetPause(NewPauseState);
     PlayerController->bShowMouseCursor = NewPauseState;
     
+    /*
     if (NewPauseState)
     {
         PlayerController->SetInputMode(FInputModeUIOnly());
@@ -106,6 +117,28 @@ void AStealthGameMode::SetPauseState(bool NewPauseState)
     {
         PlayerController->SetInputMode(FInputModeGameOnly());
     }
+    */
+}
+
+void AStealthGameMode::TogglePause()
+{
+    // If one of the game end widgets is visible, the game is over
+    if ((WinWidgetInstance && WinWidgetInstance->IsVisible()) || (LoseWidgetInstance && LoseWidgetInstance->IsVisible()))
+    {
+        return;
+    }
+
+    bool newPauseState = !IsPaused();
+
+    if (!PauseWidgetInstance)
+    {
+        PauseWidgetInstance = CreateWidget(GetWorld(), PauseWidget);
+        PauseWidgetInstance->AddToViewport();
+    }
+
+    PauseWidgetInstance->SetVisibility(newPauseState ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
+    SetPauseState(newPauseState);
 }
 
 void AStealthGameMode::OnAlarmTriggered()
@@ -193,15 +226,13 @@ FRandomStream AStealthGameMode::CreateRandomStream(const int32 RandomSeed)
 void AStealthGameMode::OnGameWin()
 {
     // Show win widget and pause game
-    if (!GameResultWidget)
+    if (!WinWidgetInstance)
     {
-        GameResultWidget = CreateWidget(GetWorld(), WinWidget);
-        GameResultWidget->AddToViewport(0);
+        WinWidgetInstance = CreateWidget(GetWorld(), WinWidget);
+        WinWidgetInstance->AddToViewport();
     }
-    else
-    {
-        GameResultWidget->SetVisibility(ESlateVisibility::Visible);
-    }
+    
+    WinWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 
     SetPauseState(true);
 }
@@ -209,15 +240,13 @@ void AStealthGameMode::OnGameWin()
 void AStealthGameMode::OnGameLose()
 {
     // Show lose widget and pause game
-    if (!GameResultWidget)
+    if (!LoseWidgetInstance)
     {
-        GameResultWidget = CreateWidget(GetWorld(), LoseWidget);
-        GameResultWidget->AddToViewport(0);
+        LoseWidgetInstance = CreateWidget(GetWorld(), LoseWidget);
+        LoseWidgetInstance->AddToViewport();
     }
-    else
-    {
-        GameResultWidget->SetVisibility(ESlateVisibility::Visible);
-    }
+
+    LoseWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 
     SetPauseState(true);
 }

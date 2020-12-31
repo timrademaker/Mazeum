@@ -30,6 +30,10 @@ public:
     UFUNCTION(BlueprintCallable, meta = (Keywords = "Pause Unpause", ToolTip = "Pause or unpause the game"))
     void SetPauseState(bool NewPauseState);
 
+    /** Toggle the pause state of the game */
+    UFUNCTION(BlueprintCallable, meta = (Keywords = "Pause Unpause", ToolTip = "Toggle the pause state of the game"))
+    void TogglePause();
+
 protected:
     /** Callback for alarm components when the player is spotted */
     void OnAlarmTriggered();
@@ -82,6 +86,9 @@ public:
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The widget to display when the player loses"))
     TSubclassOf<UUserWidget> LoseWidget;
 
+    UPROPERTY(EditAnywhere, meta = (ToolTip = "The widget to display when the player pauses the game"))
+    TSubclassOf<UUserWidget> PauseWidget;
+
 private:
     /** The seed to use for random streams */
     int32 RandomisationSeed = 0;
@@ -91,6 +98,12 @@ private:
     /** The player's PlayerController */
     APlayerController* PlayerController = nullptr;
 
-    /** The widget that is displayed when the game ended */
-    UUserWidget* GameResultWidget = nullptr;
+    /** The widget that is displayed when the game ended and the player won */
+    UUserWidget* WinWidgetInstance = nullptr;
+
+    /** The widget that is displayed when the game ended and the player lost */
+    UUserWidget* LoseWidgetInstance = nullptr;
+
+    /** The GameMode's instance of the pause widget */
+    UUserWidget* PauseWidgetInstance = nullptr;
 };
