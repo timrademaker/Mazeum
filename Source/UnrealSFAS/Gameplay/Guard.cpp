@@ -176,7 +176,16 @@ void AGuard::Tick(float DeltaTime)
 	
 	if (GuardCanSeeActor(PlayerPawn))
 	{
-		AlarmComponent->TriggerAlarm();
+		CurrentTimeInView += DeltaTime;
+		if (CurrentTimeInView >= MaximumTimeInView)
+		{
+			AlarmComponent->TriggerAlarm();
+		}
 	}
+	else
+	{
+		CurrentTimeInView = 0.0f;
+	}
+
 }
 

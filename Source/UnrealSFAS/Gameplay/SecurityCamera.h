@@ -42,11 +42,13 @@ private:
 	bool CameraCanSeeActor(const AActor* Actor);
 
 public:
-	UPROPERTY(EditAnywhere, Category="Timing", meta = (ToolTip = "The time it takes for the camera to look at the spline from start to end", ClampMin = "0.1"))
+	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "The time it takes for the camera to look at the spline from start to end", ClampMin = "0.1"))
 	float SplinePathDuration = 10.0f;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (ToolTip = "The time the camera waits before reversing on its path. If negative, the camera doesn't reverse, but instead closes the spline.", ClampMin = "-1.0"))
+	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "The time the camera waits before reversing on its path. If negative, the camera doesn't reverse, but instead closes the spline.", ClampMin = "-1.0"))
 	float SplineEndWaitTime = 2.5f;
-	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The camera's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
+	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "How long (in seconds) the player can stay in the camera's view before the alarm is raised", ClampMin = "0.0"))
+	float MaximumTimeInView = 0.2f;
+	UPROPERTY(EditAnywhere, Category = Vision, meta = (ToolTip = "The camera's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
 	float FieldOfView = 15.0f;
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -83,4 +85,7 @@ private:
 	bool IsMovingBackToSplineStart = false;
 	/** How long the camera still has to wait before it starts to move in the opposite direction */
 	float ReverseCountDown = 0.0f;
+
+	/** How long the player has been in view consecutively */
+	float CurrentTimeInView = 0.0f;
 };

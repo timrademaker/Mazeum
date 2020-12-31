@@ -155,7 +155,15 @@ void ASecurityCamera::Tick(float DeltaTime)
 
 	if (CameraCanSeeActor(PlayerPawn))
 	{
-		AlarmComponent->TriggerAlarm();
+		CurrentTimeInView += DeltaTime;
+		if (CurrentTimeInView >= MaximumTimeInView)
+		{
+			AlarmComponent->TriggerAlarm();
+		}
+	}
+	else
+	{
+		CurrentTimeInView = 0.0f;
 	}
 }
 

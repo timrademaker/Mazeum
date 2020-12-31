@@ -51,10 +51,13 @@ private:
 	bool GuardCanSeeActor(const AActor* Actor);
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The guard's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
+	UPROPERTY(EditAnywhere, Category = Vision, meta = (ToolTip = "The guard's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
 	float FieldOfView = 75.0f;
-	UPROPERTY(EditAnywhere, Category = "Vision", meta = (ToolTip = "The range at which the guard can spot the player", ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = Vision, meta = (ToolTip = "The range at which the guard can spot the player", ClampMin = "0.0"))
 	float VisionRange = 500.0f;
+
+	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "How long (in seconds) the player can stay in the guard's view before the alarm is raised", ClampMin = "0.0"))
+	float MaximumTimeInView = 0.2f;
 
 private:
 	/** The path the guard is currently patrolling */
@@ -83,4 +86,7 @@ private:
 	APawn* PlayerPawn = nullptr;
 	/** The guard's alarm component */
 	UAlarmComponent* AlarmComponent = nullptr;
+
+	/** How long the player has been in view consecutively */
+	float CurrentTimeInView = 0.0f;
 };
