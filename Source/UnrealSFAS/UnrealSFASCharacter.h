@@ -53,9 +53,6 @@ protected:
 	/** Called via input when the player tries to interact with something */
 	void OnInteract();
 
-	/** Called via input when the player tries to drop their held item */
-	void OnDropHeldItem();
-
 	/** Called via input when the player tries to crouch */
 	void OnCrouch();
 	/** Called via input when the player tries to stop crouching */
@@ -77,13 +74,6 @@ protected:
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	//End of ACharacter interface
-
-private:
-	/**
-	 * Calculate a movement speed modifier based on the item the player is currently holding
-	 * @returns A normalized value (0-1) representing the movement speed modifier
-	 */
-	float CalculateMovementSpeedModifier() const;
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -117,9 +107,6 @@ private:
 
 	/** Actors the player can interact with through the "Interact" keybind */
 	TArray<AActor*> Interactables;
-
-	/** The item the player is holding */
-	class APickUpBase* HeldItem;
 
 	/** The transform of the character when the game starts */
 	FTransform StartTransform;

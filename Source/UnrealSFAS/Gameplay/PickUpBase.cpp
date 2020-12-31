@@ -10,8 +10,7 @@ APickUpBase::APickUpBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	RootComponent = ItemMesh;
+	PropSize = EPropSize::Small;
 }
 
 void APickUpBase::Interact(const AActor* InstigatedBy)
@@ -21,50 +20,22 @@ void APickUpBase::Interact(const AActor* InstigatedBy)
 
 void APickUpBase::PickUpItem(const AActor* PickedUpBy)
 {
-	ItemPickedUpByActor = PickedUpBy;
-
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
 	ItemPickedUpDelegate.Broadcast();
 }
 
-void APickUpBase::DropItem()
+void APickUpBase::BeginPlay()
 {
-	if (ItemPickedUpByActor)
+	ARandomProp* randomProp = Cast<ARandomProp>(RandomPropBlueprint);
+
+	if (randomProp && SmallProps.Num() == 0 && MediumProps.Num() == 0 && LargeProps.Num() == 0)
 	{
-		const FVector itemMeshExtents = ItemMesh->GetStaticMesh()->GetBounds().BoxExtent;
-		const FVector itemScale = ItemMesh->GetComponentScale();
-
-		// Check where the item can be dropped
-		FVector traceStart;
-		FVector extentOfHoldingActor;
-		ItemPickedUpByActor->GetActorBounds(true, traceStart, extentOfHoldingActor);
-
-		const FVector traceEnd = traceStart - FVector(0.0f, 0.0f, extentOfHoldingActor.Z) - (ItemPickedUpByActor->GetActorForwardVector() * ((itemMeshExtents * itemScale * 2.0f) + extentOfHoldingActor));
-
-		FHitResult hitResult;
-		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(ItemPickedUpByActor);
-
-		GetWorld()->LineTraceSingleByChannel(hitResult, traceStart, traceEnd, ECollisionChannel::ECC_Camera, queryParams);
-
-		// Drop the item (on the floor)
-		if (hitResult.bBlockingHit)
-		{
-			FVector traceDirection = traceEnd - traceStart;
-			traceDirection.Normalize();
-			const FVector dropLocation = traceStart + (traceDirection * hitResult.Distance) + itemMeshExtents.Z * itemScale.Z;
-			SetActorLocation(dropLocation, true);
-		}
-		else
-		{
-			SetActorLocation(traceEnd, true);
-		}
-
-		ItemPickedUpByActor = nullptr;
+		SmallProps = randomProp->SmallProps;
+		MediumProps = randomProp->MediumProps;
+		LargeProps = randomProp->LargeProps;
 	}
 
-	SetActorHiddenInGame(false);
-	SetActorEnableCollision(true);
+	Super::BeginPlay();
 }

@@ -110,7 +110,6 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	// Interaction with items
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AUnrealSFASCharacter::OnInteract);
-	PlayerInputComponent->BindAction("DropHeldItem", IE_Pressed, this, &AUnrealSFASCharacter::OnDropHeldItem);
 
 	// Crouching
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AUnrealSFASCharacter::OnCrouch);
@@ -119,20 +118,6 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// Pausing
 	FInputActionBinding& pauseToggle = PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AUnrealSFASCharacter::OnPause);
 	pauseToggle.bExecuteWhenPaused = true;
-}
-
-float AUnrealSFASCharacter::CalculateMovementSpeedModifier() const
-{
-	if (!HeldItem)
-	{
-		return 1.0f;
-	}
-	else
-	{
-		const float weight = HeldItem->GetItemWeight();
-		const float modifier = 1.0f - weight / MaximumItemWeight;
-		return FMath::Clamp(modifier, MinimumMovementSpeedModifier, 1.0f);
-	}
 }
 
 void AUnrealSFASCharacter::Reset()
@@ -178,21 +163,6 @@ void AUnrealSFASCharacter::OnInteract()
 	if (nearestInteractableInRange)
 	{
 		nearestInteractableInRange->Interact(this);
-		
-		if (!HeldItem)
-		{
-			// If the interactable is derived from APickUpBase, we now hold the item.
-			HeldItem = Cast<APickUpBase>(nearestInteractableInRange);
-		}
-	}
-}
-
-void AUnrealSFASCharacter::OnDropHeldItem()
-{
-	if (HeldItem)
-	{
-		HeldItem->DropItem();
-		HeldItem = nullptr;
 	}
 }
 
@@ -237,7 +207,7 @@ void AUnrealSFASCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value * CalculateMovementSpeedModifier());
+		AddMovementInput(Direction, Value);
 	}
 }
 
@@ -252,6 +222,6 @@ void AUnrealSFASCharacter::MoveRight(float Value)
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value * CalculateMovementSpeedModifier());
+		AddMovementInput(Direction, Value);
 	}
 }

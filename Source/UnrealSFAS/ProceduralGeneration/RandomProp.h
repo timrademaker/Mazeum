@@ -40,7 +40,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Meshes, meta = (ToolTip = "Props that fit on the wide table"))
 	TArray<UStaticMesh*> LargeProps;
 
-private:
+protected:
 	/** The static mesh for this prop */
 	UStaticMeshComponent* StaticMesh;
 };
