@@ -37,12 +37,6 @@ void AMuseum::BeginPlay()
 }
 
 
-void AMuseum::PlaceHalls(const FMapGrid& MuseumLayout)
-{
-	// TODO: Implement
-	check(false);
-}
-
 void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 {
 	const FVector blockSize = UConstantsFunctionLibrary::GetBlockSize();
@@ -90,11 +84,5 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, GetActorRotation());
 		r->SetRoomRotation(room.Rotation);
 	}
-}
-
-void AMuseum::PlaceVents(const FMapGrid& VentMap)
-{
-	// TODO: Implement
-	check(false);
 }
 

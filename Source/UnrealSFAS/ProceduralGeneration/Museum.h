@@ -25,9 +25,7 @@ protected:
 
 private:
 	/* Placement */
-	void PlaceHalls(const FMapGrid& MuseumLayout);
 	void PlaceRooms(const TArray<FRoomPlacement>& Rooms);
-	void PlaceVents(const FMapGrid& VentMap);
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))
