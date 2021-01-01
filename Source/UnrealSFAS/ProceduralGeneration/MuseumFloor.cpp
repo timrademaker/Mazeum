@@ -15,7 +15,7 @@ AMuseumFloor::AMuseumFloor()
 
 void AMuseumFloor::PlaceFloor(const FMapGrid& Grid)
 {
-	if (FloorMeshComponent)
+	if (FloorTileMeshComponent)
 	{
 		const FVector blockSize = UConstantsFunctionLibrary::GetBlockSize();
 		const float blockZPos = GetActorLocation().Z;
@@ -40,11 +40,21 @@ void AMuseumFloor::PlaceFloor(const FMapGrid& Grid)
 
 				const FVector worldPosition(blockPos, blockZPos);
 
-				UStaticMeshComponent* meshComponent = NewObject<UStaticMeshComponent>(this, FloorMeshComponent);
+				UStaticMeshComponent* floorMeshComponent = NewObject<UStaticMeshComponent>(this, FloorTileMeshComponent);
 
-				meshComponent->SetWorldLocation(worldPosition);
-				meshComponent->AttachToComponent(rootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-				meshComponent->RegisterComponent();
+				floorMeshComponent->SetWorldLocation(worldPosition);
+				floorMeshComponent->AttachToComponent(rootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+				floorMeshComponent->RegisterComponent();
+
+				if (VentTileMeshComponent)
+				{
+					UStaticMeshComponent* ventMeshComponent = NewObject<UStaticMeshComponent>(floorMeshComponent, VentTileMeshComponent);
+					ventMeshComponent->AttachToComponent(floorMeshComponent, FAttachmentTransformRules::KeepRelativeTransform);
+					ventMeshComponent->AddLocalOffset(FVector(0.0f, 0.0f, -200.0f));
+					ventMeshComponent->SetRelativeScale3D(FVector(1.0f));
+					ventMeshComponent->AddLocalRotation(FRotator(0.0f, 0.0f, 180.0f));
+					ventMeshComponent->RegisterComponent();
+				}
 			}
 		}
 	}

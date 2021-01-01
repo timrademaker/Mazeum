@@ -27,5 +27,8 @@ public:
 	FVector2D FloorComponentAlignment = FVector2D(0.5f);
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UStaticMeshComponent> FloorMeshComponent = nullptr;
+	TSubclassOf<UStaticMeshComponent> FloorTileMeshComponent = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UStaticMeshComponent> VentTileMeshComponent = nullptr;
 };
