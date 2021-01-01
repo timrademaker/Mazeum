@@ -8,7 +8,9 @@
 #include "StealthGameMode.h"
 
 #include "Components/BoxComponent.h"
+#if WITH_EDITOR
 #include "EditorAssetLibrary.h"
+#endif
 #include "Engine/DataTable.h"
 
 
