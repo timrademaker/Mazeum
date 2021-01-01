@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
-#include "../MapGrid.h"
-
 #include "MuseumCeiling.generated.h"
 
 UCLASS()

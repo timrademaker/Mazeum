@@ -1,6 +1,7 @@
 #include "MuseumCeiling.h"
 
 #include "../ConstantsFunctionLibrary.h"
+#include "../MapGrid.h"
 
 AMuseumCeiling::AMuseumCeiling()
 {
