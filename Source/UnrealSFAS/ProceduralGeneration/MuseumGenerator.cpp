@@ -1,21 +1,25 @@
 #include "MuseumGenerator.h"
 
-void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutRoomMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
+void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
 {
-	// TODO: Is room mask needed as arg? Would OutVentEntranceMask not be more useful?
+	// Should this function also place the museum? Then AMuseum can strictly be the class holding actors
+	// Issue: This class has no variables, but would need the BP class for walls/floor/ceiling etc
 
 	OutHallMask = FMuseumGenerator::SelectMuseumLayout();
-	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, OutRoomMask);
-	FMapGrid ventEntranceMask = FMuseumGenerator::CreateVentEntranceMask(OutRoomPlacement, OutHallMask.GetWidth(), OutHallMask.GetDepth());
+	FMapGrid roomMask(OutHallMask.GetWidth(), OutHallMask.GetDepth());
+
+	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, roomMask);
+	OutVentEntranceMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Vent, OutHallMask.GetWidth(), OutHallMask.GetDepth());
 	
+	OutDoorMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Door, OutHallMask.GetWidth(), OutHallMask.GetDepth());
+
 	/*
 	OutVentMask = FMuseumGenerator::GenerateVentLayout(ventEntranceMask);
-	// TODO: Door mask
 	// TODO: Verify layout
 
 	while (!FMuseumGenerator::LayoutIsValid(OutHallMask, OutRoomMask, OutVentMask))
 	{
-		OutVentMask = GenerateVentLayout(OutRoomMask);
+		OutVentMask = FMuseumGenerator::GenerateVentLayout(ventEntranceMask);
 	}
 	*/
 }
@@ -505,11 +509,11 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 	}
 }
 
-FMapGrid FMuseumGenerator::CreateVentEntranceMask(const TArray<FRoomPlacement>& RoomPlacement, int MaskWidth, int MaskDepth)
+FMapGrid FMuseumGenerator::CreateBuildingBlockMask(const TArray<FRoomPlacement>& RoomPlacement, const EBuildingBlockType BuildingBlockType, int MaskWidth, int MaskDepth)
 {
-	FMapGrid ventEntrances(MaskWidth, MaskDepth);
+	FMapGrid blockMask(MaskWidth, MaskDepth);
 
-	TArray<FIntPoint> ventLocations;
+	TArray<FIntPoint> blockLocations;
 
 
 	bool clockwiseRotation = false;
@@ -536,38 +540,38 @@ FMapGrid FMuseumGenerator::CreateVentEntranceMask(const TArray<FRoomPlacement>& 
 			roomLeftTop.Y += 1;
 		}
 
-		ventLocations.Empty();
-		roomTemplate->GetLocationsOfBlocksWithType(EBuildingBlockType::Vent, room.RoomType, ventLocations);
+		blockLocations.Empty();
+		roomTemplate->GetLocationsOfBlocksWithType(BuildingBlockType, room.RoomType, blockLocations);
 
-		for (const auto& ventPos : ventLocations)
+		for (const auto& blockPos : blockLocations)
 		{
-			int ventX = 0;
-			int ventY = 0;
+			int blockX = 0;
+			int blockY = 0;
 
 			if (clockwiseRotation)
 			{
-				ventX = roomTemplate->RoomSize.Y - 1 - ventPos.Y;
-				ventY = ventPos.X;
+				blockX = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
+				blockY = blockPos.X;
 			}
 			else if (upsideDownRotation)
 			{
-				ventX = roomTemplate->RoomSize.X - 1 - ventPos.X;
-				ventY = roomTemplate->RoomSize.Y - 1 - ventPos.Y;
+				blockX = roomTemplate->RoomSize.X - 1 - blockPos.X;
+				blockY = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
 			}
 			else if (counterclockwiseRotation)
 			{
-				ventX = ventPos.Y;
-				ventY = roomTemplate->RoomSize.X - 1 - ventPos.X;
+				blockX = blockPos.Y;
+				blockY = roomTemplate->RoomSize.X - 1 - blockPos.X;
 			}
 			else
 			{
-				ventX = ventPos.X;
-				ventY = ventPos.Y;
+				blockX = blockPos.X;
+				blockY = blockPos.Y;
 			}
 
-			ventEntrances.Set(ventX + roomLeftTop.X, ventY + roomLeftTop.Y, true);
+			blockMask.Set(blockX + roomLeftTop.X, blockY + roomLeftTop.Y, true);
 		}
 	}
 
-	return ventEntrances;
+	return blockMask;
 }
