@@ -17,9 +17,6 @@ public:
 	/** Place vents based on a grid */
 	void PlaceVents(const class FMapGrid& Grid);
 
-protected:
-	virtual void BeginPlay() override;
-
 public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* VentMesh = nullptr;

@@ -18,10 +18,6 @@ public:
 	/** Place floor tiles based on a grid */
 	void PlaceFloor(const class FMapGrid& Grid);
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The alignment of the mesh in the floor component. (0, 0) means that the mesh starts at local (0,0) coordinate and extends in the positive X and Y direction"))
 	FVector2D FloorComponentAlignment = FVector2D(0.5f);

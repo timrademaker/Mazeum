@@ -50,25 +50,3 @@ void AMuseumCeiling::PlaceCeiling(const FMapGrid& Grid)
 		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Unable to create ceiling as the ceiling mesh component is not set!"));
 	}
 }
-
-void AMuseumCeiling::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// Placeholder for the hand-made map
-	FMapGrid grid(10, 11);
-	
-	grid.SetRow(0 , 0b0011111100);
-	grid.SetRow(1 , 0b0011111100);
-	grid.SetRow(2 , 0b0011111111);
-	grid.SetRow(3 , 0b1111111111);
-	grid.SetRow(4 , 0b1111111111);
-	grid.SetRow(5 , 0b1111111111);
-	grid.SetRow(6 , 0b1111111111);
-	grid.SetRow(7 , 0b1111111111);
-	grid.SetRow(8 , 0b0011111111);
-	grid.SetRow(9 , 0b0011111111);
-	grid.SetRow(10, 0b0011111100);
-
-	PlaceCeiling(grid);
-}

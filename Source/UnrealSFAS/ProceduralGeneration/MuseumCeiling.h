@@ -19,10 +19,6 @@ public:
 	/** Place ceiling tiles based on a grid */
 	void PlaceCeiling(const class FMapGrid& Grid);
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UStaticMeshComponent> CeilingMeshComponent = nullptr;

@@ -120,26 +120,3 @@ void AMuseumWalls::PlaceWalls(const FMapGrid& HallGrid, const class FMapGrid& Do
 		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Unable to create walls as the wall mesh component is not set!"));
 	}
 }
-
-// Called when the game starts or when spawned
-void AMuseumWalls::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	// Placeholder for the hand-made map
-	FMapGrid hallGrid(10, 11);
-
-	hallGrid.SetRow(3, 0b1100000000);
-	hallGrid.SetRow(4, 0b1111111111);
-	hallGrid.SetRow(5, 0b1111111111);
-	hallGrid.SetRow(6, 0b1111111111);
-	hallGrid.SetRow(7, 0b1100000000);
-
-	FMapGrid doorLocations(10, 11);
-	doorLocations.SetRow(3, 0b0001001001);
-	doorLocations.SetRow(7, 0b0001001010);
-
-	PlaceWalls(hallGrid, doorLocations);
-}
-
-

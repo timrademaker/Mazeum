@@ -12,25 +12,6 @@ AMuseumVents::AMuseumVents()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AMuseumVents::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	// Placeholder for the hand-made map
-	FMapGrid grid(10, 11);
-	grid.SetRow(2, 0b0000000010);
-	grid.SetRow(3, 0b0000001110);
-	grid.SetRow(4, 0b0000011010);
-	grid.SetRow(5, 0b0000010010);
-	grid.SetRow(6, 0b0000010010);
-	grid.SetRow(7, 0b0000111110);
-	grid.SetRow(8, 0b0000100010);
-	grid.SetRow(9, 0b0000111110);
-	grid.SetRow(10, 0b0000000100);
-
-	PlaceVents(grid);
-}
-
 void AMuseumVents::PlaceVents(const FMapGrid& Grid)
 {
 	if (VentMesh)

@@ -63,22 +63,3 @@ void AMuseumFloor::PlaceFloor(const FMapGrid& Grid)
 		UE_LOG(LogTemp, Warning, TEXT("%s"), TEXT("Unable to create floor as the floor mesh component is not set!"));
 	}
 }
-
-// Called when the game starts or when spawned
-void AMuseumFloor::BeginPlay()
-{
-	Super::BeginPlay();
-	
-
-	// Placeholder for the hand-made map
-	FMapGrid grid(10, 11);
-
-	grid.SetRow(3 , 0b1100000000);
-	grid.SetRow(4 , 0b1111111111);
-	grid.SetRow(5 , 0b1111111111);
-	grid.SetRow(6 , 0b1111111111);
-	grid.SetRow(7 , 0b1100000000);
-
-	PlaceFloor(grid);
-
-}
