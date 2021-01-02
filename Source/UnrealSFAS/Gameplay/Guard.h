@@ -57,7 +57,7 @@ public:
 	float VisionRange = 500.0f;
 
 	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "How long (in seconds) the player can stay in the guard's view before the alarm is raised", ClampMin = "0.0"))
-	float MaximumTimeInView = 0.2f;
+	float MaximumTimeInView = 0.05f;
 
 private:
 	/** The path the guard is currently patrolling */
