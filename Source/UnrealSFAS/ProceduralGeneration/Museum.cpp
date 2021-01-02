@@ -3,8 +3,15 @@
 
 #include "Museum.h"
 
-#include "../ConstantsFunctionLibrary.h"
 #include "MuseumGenerator.h"
+#include "RoomPlacement.h"
+#include "../ConstantsFunctionLibrary.h"
+#include "../MapGrid.h"
+
+#include "MuseumCeiling.h"
+#include "MuseumFloor.h"
+#include "MuseumVents.h"
+#include "MuseumWalls.h"
 
 
 // Sets default values
@@ -21,18 +28,36 @@ void AMuseum::BeginPlay()
 	Super::BeginPlay();
 
 	FMapGrid hallMask;
-	FMapGrid roomMask;
+	FMapGrid ventEntranceMask;
 	FMapGrid ventMask;
 	FMapGrid doorMask;
 	TArray<FRoomPlacement> roomPlacement;
 
-	FMuseumGenerator::GenerateMuseum(PossibleRooms, roomPlacement, hallMask, roomMask, doorMask, ventMask);
+	FMuseumGenerator::GenerateMuseum(PossibleRooms, roomPlacement, hallMask, ventEntranceMask, doorMask, ventMask);
+
+
+	// Create floor actor
+	AMuseumFloor* floor = GetWorld()->SpawnActor<AMuseumFloor>(MuseumFloorClass);
+	floor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	floor->PlaceFloor(hallMask);
+
+	// Create ceiling actor
+	AMuseumCeiling* ceiling = GetWorld()->SpawnActor<AMuseumCeiling>(MuseumCeilingClass);
+	ceiling->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	ceiling->PlaceCeiling(hallMask);
+
+	// Create walls actor
+	AMuseumWalls* walls = GetWorld()->SpawnActor<AMuseumWalls>(MuseumWallsClass);
+	walls->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	walls->PlaceWalls(hallMask, doorMask);
+
+	// Create vent actor
+	AMuseumVents* vents = GetWorld()->SpawnActor<AMuseumVents>(MuseumVentsClass);
+	vents->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	vents->PlaceVents(ventMask);
 
 	/*
-	// Create map
 	PlaceRooms(rooms);
-	PlaceVents(ventLayout);
-	// Place halls
 	*/
 }
 

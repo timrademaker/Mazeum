@@ -5,9 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
-#include "../MapGrid.h"
-#include "RoomPlacement.h"
-
 #include "Museum.generated.h"
 
 UCLASS()
@@ -25,9 +22,21 @@ protected:
 
 private:
 	/* Placement */
-	void PlaceRooms(const TArray<FRoomPlacement>& Rooms);
+	void PlaceRooms(const TArray<struct FRoomPlacement>& Rooms);
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The rooms to use when generating the museum"))
-	TArray<TSubclassOf<ARoomTemplate>> PossibleRooms;
+	TArray<TSubclassOf<class ARoomTemplate>> PossibleRooms;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class used to place walls"))
+	TSubclassOf<class AMuseumWalls> MuseumWallsClass;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class used to place ceilings"))
+	TSubclassOf<class AMuseumCeiling> MuseumCeilingClass;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class used to create the museum's floor"))
+	TSubclassOf<class AMuseumFloor> MuseumFloorClass;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class used to place vents"))
+	TSubclassOf<class AMuseumVents> MuseumVentsClass;
 };
