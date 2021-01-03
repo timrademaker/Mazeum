@@ -49,6 +49,7 @@ void AMuseumVents::PlaceVents(const FMapGrid& Grid)
 				FTransform worldXForm(worldRotation, worldPosition, worldScale);
 
 				meshComponent->SetStaticMesh(VentMesh);
+				meshComponent->SetReceivesDecals(false);
 
 				if (VentMaterial)
 				{
