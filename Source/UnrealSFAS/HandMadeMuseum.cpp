@@ -31,8 +31,8 @@ void AHandMadeMuseum::BeginPlay()
 
 	ceilingMask.SetRow(0, 0b0011111100);
 	ceilingMask.SetRow(1, 0b0011111100);
-	ceilingMask.SetRow(2, 0b0011111111);
-	ceilingMask.SetRow(3, 0b1111111111);
+	ceilingMask.SetRow(2, 0b0011111100);
+	ceilingMask.SetRow(3, 0b1111111100);
 	ceilingMask.SetRow(4, 0b1111111111);
 	ceilingMask.SetRow(5, 0b1111111111);
 	ceilingMask.SetRow(6, 0b1111111111);
@@ -42,13 +42,13 @@ void AHandMadeMuseum::BeginPlay()
 	ceilingMask.SetRow(10, 0b0011111100);
 
 	doorMask = FMapGrid(10, 11);
-	doorMask.SetRow(3, 0b0001001001);
+	doorMask.SetRow(3, 0b0001001000);
 	doorMask.SetRow(7, 0b0001001010);
 
 	ventMask = FMapGrid(10, 11);
-	ventMask.SetRow(2, 0b0000000010);
-	ventMask.SetRow(3, 0b0000001110);
-	ventMask.SetRow(4, 0b0000011010);
+	ventMask.SetRow(2, 0b0000000000);
+	ventMask.SetRow(3, 0b0000001100);
+	ventMask.SetRow(4, 0b0000011110);
 	ventMask.SetRow(5, 0b0000010010);
 	ventMask.SetRow(6, 0b0000010010);
 	ventMask.SetRow(7, 0b0000111110);
