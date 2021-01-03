@@ -3,9 +3,11 @@
 
 #include "RoomTemplate.h"
 
-#include "ConstantsFunctionLibrary.h"
 #include "BuildingBlockPlacementStruct.h"
+#include "ConstantsFunctionLibrary.h"
 #include "StealthGameMode.h"
+#include "RoomBuildingBlocks/BuildingBlockMeshComponent.h"
+
 
 #include "Components/BoxComponent.h"
 #if WITH_EDITOR
@@ -79,9 +81,36 @@ void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockT
 	return;
 }
 
-void ARoomTemplate::SetRoomRotation(const FRotator Rotation)
+void ARoomTemplate::ConvertToRoom(const FRotator& RoomRotation)
 {
-	RoomBounds->SetRelativeRotation(Rotation);
+	RoomBounds->SetRelativeRotation(RoomRotation);
+
+	// Convert room components to actors
+	// For each component
+	// Replace with actor equivalent
+	TArray<USceneComponent*> components;
+	RoomBounds->GetChildrenComponents(true, components);
+
+	for (USceneComponent* comp : components)
+	{
+		UBuildingBlockMeshComponent* componentAsBuildingBlock = Cast<UBuildingBlockMeshComponent>(comp);
+		if (!componentAsBuildingBlock)
+		{
+			continue;
+		}
+
+		TSubclassOf<AActor> actorClass = componentAsBuildingBlock->ActorEquivalent;
+		if (actorClass)
+		{
+			AActor* obj = GetWorld()->SpawnActor<AActor>(actorClass);
+			obj->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+			obj->AddActorLocalTransform(RoomBounds->GetRelativeTransform());
+			obj->AddActorLocalTransform(comp->GetRelativeTransform());
+
+			// Remove component from actor
+			comp->UnregisterComponent();
+		}
+	}
 }
 
 // Called when the game starts or when spawned

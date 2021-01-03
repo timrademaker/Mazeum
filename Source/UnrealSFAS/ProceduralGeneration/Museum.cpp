@@ -39,26 +39,28 @@ void AMuseum::BeginPlay()
 	// Create floor actor
 	AMuseumFloor* floor = GetWorld()->SpawnActor<AMuseumFloor>(MuseumFloorClass);
 	floor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	floor->SetActorRelativeLocation(FVector(0.0f));
 	floor->PlaceFloor(hallMask);
 
 	// Create ceiling actor
 	AMuseumCeiling* ceiling = GetWorld()->SpawnActor<AMuseumCeiling>(MuseumCeilingClass);
 	ceiling->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	ceiling->SetActorRelativeLocation(FVector(0.0f));
 	ceiling->PlaceCeiling(hallMask);
 
 	// Create walls actor
 	AMuseumWalls* walls = GetWorld()->SpawnActor<AMuseumWalls>(MuseumWallsClass);
 	walls->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	walls->SetActorRelativeLocation(FVector(0.0f));
 	walls->PlaceWalls(hallMask, doorMask);
 
 	// Create vent actor
 	AMuseumVents* vents = GetWorld()->SpawnActor<AMuseumVents>(MuseumVentsClass);
 	vents->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	vents->SetActorRelativeLocation(FVector(0.0f));
 	vents->PlaceVents(ventMask);
 
-	/*
-	PlaceRooms(rooms);
-	*/
+	PlaceRooms(roomPlacement);
 }
 
 
@@ -105,9 +107,11 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 			}
 		}
 
-		// Spawn actor (temporary solution)
+		// Spawn actor and convert to an actual room
 		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, GetActorRotation());
-		r->SetRoomRotation(room.Rotation);
+		r->ConvertToRoom(room.Rotation);
+		r->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+
 	}
 }
 

@@ -25,13 +25,15 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/*
-	* @brief Gets the location of all building block of a certain type in this type of room
-	*/
+	/** Gets the location of all building block of a certain type in this type of room */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static void GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations);
 
-	void SetRoomRotation(const FRotator Rotation);
+	/**
+	 * Convert this room's components to actors, if possible
+	 * @param RoomRotation The rotation of the room, as specified in FRoomPlacement
+	 */
+	void ConvertToRoom(const FRotator& RoomRotation);
 
 protected:
 	// Called when the game starts or when spawned
