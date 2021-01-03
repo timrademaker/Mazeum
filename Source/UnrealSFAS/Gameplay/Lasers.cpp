@@ -29,6 +29,38 @@ ALasers::ALasers()
 
 void ALasers::OnConstruction(const FTransform& Transform)
 {
+	AddLasers();
+}
+
+void ALasers::SetLasersEnabled(const bool Enabled)
+{
+	LasersAreEnabled = Enabled;
+	
+	for (UStaticMeshComponent* laser : AddedLaserMeshes)
+	{
+		laser->SetVisibility(LasersAreEnabled);
+	}
+}
+
+void ALasers::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
+
+	AddLasers();
+}
+
+void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (LasersAreEnabled && Cast<AActor>(OverlappedComponent) == PlayerPawn)
+	{
+		AlarmComponent->TriggerAlarm();
+	}
+}
+
+void ALasers::AddLasers()
+{
 #if WITH_EDITOR
 	for (UStaticMeshComponent* laser : AddedLaserMeshes)
 	{
@@ -66,25 +98,28 @@ void ALasers::OnConstruction(const FTransform& Transform)
 			laser->SetStaticMesh(LaserBeamMesh);
 
 			const float xScale = LaserArea->GetUnscaledBoxExtent().X / LaserBeamMesh->GetBounds().BoxExtent.X;
-
 			laser->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
 
+			laser->RegisterComponent();
 			AddedLaserMeshes.Add(laser);
 		}
 
 		if (LaserEndMesh)
 		{
 			UStaticMeshComponent* leftLaserEnd = NewObject<UStaticMeshComponent>(this);
-			
+
 			leftLaserEnd->AttachToComponent(LaserArea, FAttachmentTransformRules::KeepRelativeTransform);
-			
+
 			leftLaserEnd->SetRelativeLocation(FVector(-laserAreaExtent.X, 0.0f, laserZ));
-			
+
 			leftLaserEnd->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			leftLaserEnd->SetStaticMesh(LaserEndMesh);
 
 			UStaticMeshComponent* rightLaserEnd = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), NAME_None, RF_NoFlags, leftLaserEnd);
 			rightLaserEnd->SetRelativeLocation(FVector(laserAreaExtent.X, 0.0f, laserZ));
+
+			leftLaserEnd->RegisterComponent();
+			rightLaserEnd->RegisterComponent();
 
 #if WITH_EDITOR
 			AddedLaserEnds.Add(leftLaserEnd);
@@ -92,30 +127,7 @@ void ALasers::OnConstruction(const FTransform& Transform)
 #endif
 		}
 	}
-}
 
-void ALasers::SetLasersEnabled(const bool Enabled)
-{
-	LasersAreEnabled = Enabled;
-	
-	for (UStaticMeshComponent* laser : AddedLaserMeshes)
-	{
-		laser->SetVisibility(LasersAreEnabled);
-	}
-}
-
-void ALasers::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
-}
-
-void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (LasersAreEnabled && Cast<AActor>(OverlappedComponent) == PlayerPawn)
-	{
-		AlarmComponent->TriggerAlarm();
-	}
+	SetLasersEnabled(LasersAreEnabled);
 }
 

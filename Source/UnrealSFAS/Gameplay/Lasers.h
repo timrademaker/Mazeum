@@ -31,6 +31,9 @@ private:
 	UFUNCTION()
 	void OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 
+	/** Add lasers to this object based on NumberOfLasers */
+	void AddLasers();
+
 public:
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "The number of lasers to place vertically inside the laser bounding box"))
 	uint8 NumberOfLasers = 6;
