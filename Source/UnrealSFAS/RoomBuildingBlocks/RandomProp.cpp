@@ -3,6 +3,8 @@
 
 #include "RandomProp.h"
 
+#include "RandomPropComponent.h"
+
 // Sets default values
 ARandomProp::ARandomProp()
 {
@@ -12,14 +14,28 @@ ARandomProp::ARandomProp()
 	StaticMesh->SetupAttachment(RootComponent);
 }
 
+void ARandomProp::SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent)
+{
+	const URandomPropComponent* propComponent = Cast<URandomPropComponent>(BuildingBlockComponent);
+	if(propComponent)
+	{
+		PropSize = propComponent->PropSize;
+	}
+}
+
 // Called when the game starts or when spawned
 void ARandomProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SetUpProp();
+}
+
+void ARandomProp::SetUpProp()
+{
 	TArray<UStaticMesh*>* meshArrah = nullptr;
 	bool shouldBeRotated = false;
-	
+
 	FRotator modelRotation;
 
 	switch (PropSize)

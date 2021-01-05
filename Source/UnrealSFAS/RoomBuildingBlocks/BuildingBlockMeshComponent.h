@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "BuildingBlockActorBase.h"
+
 #include "CoreMinimal.h"
 #include "Components/StaticMeshComponent.h"
 #include "BuildingBlockMeshComponent.generated.h"
@@ -24,8 +26,8 @@ class UNREALSFAS_API UBuildingBlockMeshComponent : public UStaticMeshComponent
 
 public:
     UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The actor equivalent of this component. In the case of a door mesh, this would be the actual door."))
-        TSubclassOf<AActor> ActorEquivalent;
+    TSubclassOf<ABuildingBlockActorBase> ActorEquivalent;
 
     UPROPERTY(EditDefaultsOnly)
-        EBuildingBlockType BuildingBlockType;
+    EBuildingBlockType BuildingBlockType;
 };

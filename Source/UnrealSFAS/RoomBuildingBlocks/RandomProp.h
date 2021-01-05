@@ -2,20 +2,15 @@
 
 #pragma once
 
+#include "BuildingBlockActorBase.h"
+#include "PropSizeEnum.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RandomProp.generated.h"
 
-UENUM()
-enum class EPropSize : uint8
-{
-	Small,
-	Medium,
-	Large
-};
-
 UCLASS()
-class UNREALSFAS_API ARandomProp : public AActor
+class UNREALSFAS_API ARandomProp : public ABuildingBlockActorBase
 {
 	GENERATED_BODY()
 	
@@ -23,9 +18,15 @@ public:
 	// Sets default values for this actor's properties
 	ARandomProp();
 
+	virtual void SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+	/** Choose the prop to use for this random prop and set it up */
+	void SetUpProp();
 
 public:
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "The size of the required prop"))

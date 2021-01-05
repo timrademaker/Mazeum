@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../InteractableInterface.h"
-#include "../ProceduralGeneration/RandomProp.h"
+#include "../RoomBuildingBlocks/RandomProp.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
