@@ -99,11 +99,15 @@ void ARoomTemplate::ConvertToRoom(const FRotator& RoomRotation)
 			continue;
 		}
 
-		TSubclassOf<AActor> actorClass = componentAsBuildingBlock->ActorEquivalent;
+		TSubclassOf<ABuildingBlockActorBase> actorClass = componentAsBuildingBlock->ActorEquivalent;
 		if (actorClass)
 		{
-			AActor* obj = GetWorld()->SpawnActor<AActor>(actorClass);
+			ABuildingBlockActorBase* obj = GetWorld()->SpawnActorDeferred<ABuildingBlockActorBase>(actorClass, FTransform());
+			obj->SetUpBuildingBlock(componentAsBuildingBlock);
+			obj->FinishSpawning(FTransform());
+
 			obj->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+
 			obj->AddActorLocalTransform(RoomBounds->GetRelativeTransform());
 			obj->AddActorLocalTransform(comp->GetRelativeTransform());
 
