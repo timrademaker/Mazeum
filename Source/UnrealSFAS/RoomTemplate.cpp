@@ -111,7 +111,7 @@ void ARoomTemplate::ConvertToRoom(const FRotator& RoomRotation)
 			obj->AddActorLocalTransform(RoomBounds->GetRelativeTransform());
 			obj->AddActorLocalTransform(comp->GetRelativeTransform());
 
-			// Remove component from actor
+			// Remove component from room template actor
 			comp->UnregisterComponent();
 		}
 	}

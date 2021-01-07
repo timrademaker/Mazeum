@@ -10,6 +10,8 @@ ARandomProp::ARandomProp()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
+
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	StaticMesh->SetupAttachment(RootComponent);
 }
@@ -68,6 +70,6 @@ void ARandomProp::SetUpProp()
 
 	if (shouldBeRotated)
 	{
-		SetActorRotation(FRotator(0.0f, FMath::FRandRange(0.0f, 360.0f), 0.0f));
+		StaticMesh->AddRelativeRotation(FRotator(0.0f, FMath::FRandRange(0.0f, 360.0f), 0.0f));
 	}
 }
