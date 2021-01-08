@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../RoomBuildingBlocks/BuildingBlockActorBase.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SecurityCamera.generated.h"
@@ -13,13 +15,15 @@ class UStaticMeshComponent;
 class UAlarmComponent;
 
 UCLASS()
-class UNREALSFAS_API ASecurityCamera : public AActor
+class UNREALSFAS_API ASecurityCamera : public ABuildingBlockActorBase
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ASecurityCamera();
+
+	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -4,6 +4,7 @@
 #include "SecurityCamera.h"
 
 #include "AlarmComponent.h"
+#include "../RoomBuildingBlocks/SecurityCameraBuildingBlock.h"
 
 #include "Components/ArrowComponent.h"
 #include "Components/DecalComponent.h"
@@ -144,6 +145,37 @@ bool ASecurityCamera::CameraCanSeeActor(const AActor* TargetActor)
 	}
 
 	return false;
+}
+
+void ASecurityCamera::SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent)
+{
+	const USecurityCameraBuildingBlock* camComponent = Cast<USecurityCameraBuildingBlock>(BuildingBlockComponent);
+
+	if (PathSpline)
+	{
+		PathSpline->UnregisterComponent();
+	}
+	
+	if (camComponent)
+	{
+		SplinePathDuration = camComponent->SplinePathDuration;
+		SplineEndWaitTime = camComponent->SplineEndWaitTime;
+
+		// Check if the camera has any child components, and if one is a spline
+		TArray<USceneComponent*> childComponents;
+		camComponent->GetChildrenComponents(false, childComponents);
+
+		for (USceneComponent* comp : childComponents)
+		{
+			if (comp->IsA(USplineComponent::StaticClass()))
+			{
+				PathSpline = Cast<USplineComponent>(comp);
+			}
+		}
+
+		// Make sure the camera has a path spline set now
+		check(PathSpline);
+	}
 }
 
 // Called every frame
