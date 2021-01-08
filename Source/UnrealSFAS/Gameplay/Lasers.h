@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../RoomBuildingBlocks/BuildingBlockActorBase.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Lasers.generated.h"
@@ -12,7 +14,7 @@ class UStaticMesh;
 class UAlarmComponent;
 
 UCLASS()
-class UNREALSFAS_API ALasers : public AActor
+class UNREALSFAS_API ALasers : public ABuildingBlockActorBase
 {
 	GENERATED_BODY()
 	
@@ -23,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (ToolTip = "Enable or disable the lasers", Keywords = "Enable Disable"))
 	void SetLasersEnabled(const bool Enabled);
+
+	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,15 +51,16 @@ public:
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "The area in which the lasers are placed. If the player enters this area, the alarm is triggered."))
 	UBoxComponent* LaserArea;
 
-protected:
-	bool LasersAreEnabled = true;
-
 private:
+	/** The player's pawn */
 	APawn* PlayerPawn;
+	/** The alarm component for this actor */
 	UAlarmComponent* AlarmComponent;
 
-	TArray<UStaticMeshComponent*> AddedLaserMeshes;
 #if WITH_EDITOR
+	/** An array of laser meshes added to this actor */
+	TArray<UStaticMeshComponent*> AddedLaserMeshes;
+	/** An array of meshes placed at the end of lasers */
 	TArray<UStaticMeshComponent*> AddedLaserEnds;
 #endif
 

@@ -4,6 +4,7 @@
 #include "Lasers.h"
 
 #include "AlarmComponent.h"
+#include "../RoomBuildingBlocks/BuildingBlockMeshComponent.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -34,11 +35,19 @@ void ALasers::OnConstruction(const FTransform& Transform)
 
 void ALasers::SetLasersEnabled(const bool Enabled)
 {
-	LasersAreEnabled = Enabled;
-	
-	for (UStaticMeshComponent* laser : AddedLaserMeshes)
+	LaserArea->SetGenerateOverlapEvents(Enabled);
+	SetActorHiddenInGame(!Enabled);
+}
+
+void ALasers::SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent)
+{
+	const UStaticMesh* mesh = BuildingBlockComponent->GetStaticMesh();
+	if (mesh)
 	{
-		laser->SetVisibility(LasersAreEnabled);
+		const FVector meshExtents = mesh->GetBounds().BoxExtent;
+		LaserArea->SetBoxExtent(meshExtents);
+
+		// Scale is ignored intentionally, as this is adjusted when this actor has been set up (in RoomTemplate::ConvertToRoom)
 	}
 }
 
@@ -53,7 +62,7 @@ void ALasers::BeginPlay()
 
 void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (LasersAreEnabled && Cast<AActor>(OverlappedComponent) == PlayerPawn)
+	if (Cast<AActor>(OverlappedComponent) == PlayerPawn)
 	{
 		AlarmComponent->TriggerAlarm();
 	}
@@ -101,7 +110,10 @@ void ALasers::AddLasers()
 			laser->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
 
 			laser->RegisterComponent();
+
+#if WITH_EDITOR
 			AddedLaserMeshes.Add(laser);
+#endif
 		}
 
 		if (LaserEndMesh)
@@ -127,7 +139,5 @@ void ALasers::AddLasers()
 #endif
 		}
 	}
-
-	SetLasersEnabled(LasersAreEnabled);
 }
 
