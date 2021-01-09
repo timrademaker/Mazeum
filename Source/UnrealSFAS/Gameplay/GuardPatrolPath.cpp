@@ -5,6 +5,8 @@
 
 UGuardPatrolPathComponent::UGuardPatrolPathComponent()
 {
+    PrimaryComponentTick.bCanEverTick = false;
+
     for (int32 pointIndex = 0; pointIndex < GetNumberOfSplinePoints(); ++pointIndex)
     {
         SetSplinePointType(pointIndex, ESplinePointType::Linear);

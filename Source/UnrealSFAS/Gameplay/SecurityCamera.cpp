@@ -4,6 +4,7 @@
 #include "SecurityCamera.h"
 
 #include "AlarmComponent.h"
+#include "SecurityCameraPathComponent.h"
 #include "../RoomBuildingBlocks/SecurityCameraBuildingBlock.h"
 
 #include "Components/ArrowComponent.h"
@@ -23,8 +24,8 @@ ASecurityCamera::ASecurityCamera()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	
-	PathSpline = CreateDefaultSubobject<USplineComponent>("PathSpline");
-	PathSpline->SetupAttachment(RootComponent);
+	CameraPath = CreateDefaultSubobject<USecurityCameraPathComponent>("CameraPath");
+	CameraPath->SetupAttachment(RootComponent);
 
 	CameraMesh = CreateDefaultSubobject<UStaticMeshComponent>("CameraMesh");
 	CameraMesh->SetupAttachment(RootComponent);
@@ -55,13 +56,13 @@ void ASecurityCamera::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (SplineEndWaitTime < 0.0f)
+	if (CameraPath->SplineEndWaitTime < 0.0f)
 	{
-		PathSpline->SetClosedLoop(true);
+		CameraPath->SetClosedLoop(true);
 	}
 
-	SplineLength = PathSpline->GetSplineLength();
-	CameraMovementSpeed = SplineLength / SplinePathDuration;
+	SplineLength = CameraPath->GetSplineLength();
+	CameraMovementSpeed = SplineLength / CameraPath->SplinePathDuration;
 
 	PlayerPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
 }
@@ -73,7 +74,7 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 		CurrentDistanceAlongSpline += CameraMovementSpeed * DeltaTime * (IsMovingBackToSplineStart ? -1.0f : 1.0f);
 		CurrentDistanceAlongSpline = FMath::Clamp(CurrentDistanceAlongSpline, 0.0f, SplineLength);
 
-		const FVector targetPosition = PathSpline->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World);
+		const FVector targetPosition = CameraPath->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World);
 		CameraAreaDecal->SetWorldLocation(targetPosition);
 
 		CurrentCameraRange = (targetPosition - GetActorLocation()).Size() * HalfFieldOfViewCosine;
@@ -92,14 +93,14 @@ void ASecurityCamera::UpdateCameraTargetPosition(float DeltaTime)
 		// Check if we reached the end of the spline in either direction
 		if (CurrentDistanceAlongSpline >= SplineLength || CurrentDistanceAlongSpline <= 0.0f)
 		{
-			if (PathSpline->IsClosedLoop())
+			if (CameraPath->IsClosedLoop())
 			{
 				// Set this back to 0, as we're not reversing along the spline.
 				CurrentDistanceAlongSpline = 0.0f;
 			}
 			else
 			{
-				ReverseCountDown = SplineEndWaitTime;
+				ReverseCountDown = CameraPath->SplineEndWaitTime;
 				IsMovingBackToSplineStart = !IsMovingBackToSplineStart;
 			}
 		}
@@ -126,7 +127,7 @@ bool ASecurityCamera::CameraCanSeeActor(const AActor* TargetActor)
 		return false;
 	}
 
-	const FVector cameraForward = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, PathSpline->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World));
+	const FVector cameraForward = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, CameraPath->GetLocationAtDistanceAlongSpline(CurrentDistanceAlongSpline, ESplineCoordinateSpace::World));
 	const FVector directionToActor = UKismetMathLibrary::GetDirectionUnitVector(ownLocation, targetLocation);
 
 	const float directionForwardDot = FVector::DotProduct(cameraForward, directionToActor);
@@ -151,30 +152,28 @@ void ASecurityCamera::SetUpBuildingBlock(const UBuildingBlockMeshComponent* Buil
 {
 	const USecurityCameraBuildingBlock* camComponent = Cast<USecurityCameraBuildingBlock>(BuildingBlockComponent);
 
-	if (PathSpline)
+	if (CameraPath)
 	{
-		PathSpline->UnregisterComponent();
+		CameraPath->UnregisterComponent();
 	}
 	
 	if (camComponent)
 	{
-		SplinePathDuration = camComponent->SplinePathDuration;
-		SplineEndWaitTime = camComponent->SplineEndWaitTime;
-
 		// Check if the camera has any child components, and if one is a spline
 		TArray<USceneComponent*> childComponents;
 		camComponent->GetChildrenComponents(false, childComponents);
 
 		for (USceneComponent* comp : childComponents)
 		{
-			if (comp->IsA(USplineComponent::StaticClass()))
+			if (comp->IsA(USecurityCameraPathComponent::StaticClass()))
 			{
-				PathSpline = Cast<USplineComponent>(comp);
+				CameraPath = Cast<USecurityCameraPathComponent>(comp);
+				break;
 			}
 		}
 
 		// Make sure the camera has a path spline set now
-		check(PathSpline);
+		check(CameraPath);
 	}
 }
 

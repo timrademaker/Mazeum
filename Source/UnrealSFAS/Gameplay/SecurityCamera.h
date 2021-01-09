@@ -46,10 +46,6 @@ private:
 	bool CameraCanSeeActor(const AActor* Actor);
 
 public:
-	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "The time it takes for the camera to look at the spline from start to end", ClampMin = "0.1"))
-	float SplinePathDuration = 10.0f;
-	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "The time the camera waits before reversing on its path. If negative, the camera doesn't reverse, but instead closes the spline.", ClampMin = "-1.0"))
-	float SplineEndWaitTime = 2.5f;
 	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "How long (in seconds) the player can stay in the camera's view before the alarm is raised", ClampMin = "0.0"))
 	float MaximumTimeInView = 0.05f;
 	UPROPERTY(EditAnywhere, Category = Vision, meta = (ToolTip = "The camera's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
@@ -58,7 +54,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UDecalComponent* CameraAreaDecal;
 	UPROPERTY(EditDefaultsOnly)
-	USplineComponent* PathSpline;
+	class USecurityCameraPathComponent* CameraPath;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* CameraMesh;	// Will probably be changed to a different type later on, if the camera needs to rotate
 	UPROPERTY(EditDefaultsOnly)
