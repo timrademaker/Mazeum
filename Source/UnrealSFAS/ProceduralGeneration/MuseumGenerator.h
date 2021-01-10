@@ -95,5 +95,11 @@ private:
 	 * @return A map grid with all of the locations of a certain building block set to 1
 	 */
 	static FMapGrid CreateBuildingBlockMask(const TArray<FRoomPlacement>& RoomPlacement, const EBuildingBlockType BuildingBlockType, int MaskWidth, int MaskDepth);
-
+	/**
+	 * Find the locations of building blocks of a certain type in a room
+	 * @param RoomPlacement The room placement struct to find the building blocks in
+	 * @param BuildingBlockType The type of building block to find
+	 * @param OutFoundBuildingBlockLocations The grid coordinates of the building blocks, taking the room's rotation into account
+	 */
+	static void FindBuildingBlockLocations(const FRoomPlacement& RoomPlacement, const EBuildingBlockType BuildingBlockType, TArray<FIntPoint>& OutFoundBuildingBlockLocations);
 };

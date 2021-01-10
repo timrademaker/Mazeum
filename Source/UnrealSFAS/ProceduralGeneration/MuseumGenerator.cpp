@@ -515,63 +515,73 @@ FMapGrid FMuseumGenerator::CreateBuildingBlockMask(const TArray<FRoomPlacement>&
 
 	TArray<FIntPoint> blockLocations;
 
-
-	bool clockwiseRotation = false;
-	bool counterclockwiseRotation = false;
-	bool upsideDownRotation = false;
-
 	for (const auto& room : RoomPlacement)
 	{
-		clockwiseRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, 90.0f);
-		counterclockwiseRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, -90.0f);
-		upsideDownRotation = FMath::IsNearlyEqual(room.Rotation.Yaw, 180.0f);
+		FindBuildingBlockLocations(room, BuildingBlockType, blockLocations);
 
-		const ARoomTemplate* roomTemplate = room.RoomType->GetDefaultObject<ARoomTemplate>();
-
-		FIntPoint roomLeftTop(room.Position.X, room.Position.Y);
-		if (room.Direction == EDirection::Left)
+		for (const FIntPoint& blockPos : blockLocations)
 		{
-			roomLeftTop.X -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.Y : roomTemplate->RoomSize.X;
-			roomLeftTop.X += 1;
-		}
-		else if (room.Direction == EDirection::Up)
-		{
-			roomLeftTop.Y -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.X : roomTemplate->RoomSize.Y;
-			roomLeftTop.Y += 1;
-		}
-
-		blockLocations.Empty();
-		roomTemplate->GetLocationsOfBlocksWithType(BuildingBlockType, room.RoomType, blockLocations);
-
-		for (const auto& blockPos : blockLocations)
-		{
-			int blockX = 0;
-			int blockY = 0;
-
-			if (clockwiseRotation)
-			{
-				blockX = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
-				blockY = blockPos.X;
-			}
-			else if (upsideDownRotation)
-			{
-				blockX = roomTemplate->RoomSize.X - 1 - blockPos.X;
-				blockY = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
-			}
-			else if (counterclockwiseRotation)
-			{
-				blockX = blockPos.Y;
-				blockY = roomTemplate->RoomSize.X - 1 - blockPos.X;
-			}
-			else
-			{
-				blockX = blockPos.X;
-				blockY = blockPos.Y;
-			}
-
-			blockMask.Set(blockX + roomLeftTop.X, blockY + roomLeftTop.Y, true);
+			blockMask.Set(blockPos.X, blockPos.Y, true);
 		}
 	}
 
 	return blockMask;
+}
+
+void FMuseumGenerator::FindBuildingBlockLocations(const FRoomPlacement& RoomPlacement, const EBuildingBlockType BuildingBlockType, TArray<FIntPoint>& OutFoundBuildingBlockLocations)
+{
+	OutFoundBuildingBlockLocations.Empty();
+
+	FIntPoint roomLeftTop(RoomPlacement.Position.X, RoomPlacement.Position.Y);
+
+	const bool clockwiseRotation = FMath::IsNearlyEqual(RoomPlacement.Rotation.Yaw, 90.0f);
+	const bool counterclockwiseRotation = FMath::IsNearlyEqual(RoomPlacement.Rotation.Yaw, -90.0f);
+	const bool upsideDownRotation = FMath::IsNearlyEqual(RoomPlacement.Rotation.Yaw, 180.0f);
+
+	const ARoomTemplate* roomTemplate = RoomPlacement.RoomType->GetDefaultObject<ARoomTemplate>();
+
+	// Rotate the room if needed
+	if (RoomPlacement.Direction == EDirection::Left)
+	{
+		roomLeftTop.X -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.Y : roomTemplate->RoomSize.X;
+		roomLeftTop.X += 1;
+	}
+	else if (RoomPlacement.Direction == EDirection::Up)
+	{
+		roomLeftTop.Y -= (clockwiseRotation || counterclockwiseRotation) ? roomTemplate->RoomSize.X : roomTemplate->RoomSize.Y;
+		roomLeftTop.Y += 1;
+	}
+
+	TArray<FIntPoint> blockLocations;
+	roomTemplate->GetLocationsOfBlocksWithType(BuildingBlockType, RoomPlacement.RoomType, blockLocations);
+
+	// Determine coordinates of each building block, taking the room's rotation into account
+	for (const FIntPoint& blockPos : blockLocations)
+	{
+		int blockX = 0;
+		int blockY = 0;
+
+		if (clockwiseRotation)
+		{
+			blockX = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
+			blockY = blockPos.X;
+		}
+		else if (upsideDownRotation)
+		{
+			blockX = roomTemplate->RoomSize.X - 1 - blockPos.X;
+			blockY = roomTemplate->RoomSize.Y - 1 - blockPos.Y;
+		}
+		else if (counterclockwiseRotation)
+		{
+			blockX = blockPos.Y;
+			blockY = roomTemplate->RoomSize.X - 1 - blockPos.X;
+		}
+		else
+		{
+			blockX = blockPos.X;
+			blockY = blockPos.Y;
+		}
+
+		OutFoundBuildingBlockLocations.Add(FIntPoint(blockX + roomLeftTop.X, blockY + roomLeftTop.Y));
+	}
 }
