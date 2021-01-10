@@ -7,6 +7,7 @@
 
 #include "Gameplay/GuardPatrolPath.h"
 #include "RoomBuildingBlocks/BuildingBlockMeshComponent.h"
+#include "Gameplay/PickUpBase.h"
 
 #include "RoomTemplate.generated.h"
 
@@ -22,7 +23,12 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Gets the location of all building block of a certain type in this type of room */
+	/** 
+	 * Gets the location of all building block of a certain type in this type of room 
+	 * @param BlockType The type of block to look for
+	 * @param RoomType The room class that should be searched
+	 * @param BlockLocations The found locations of the building blocks of the specified type
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static void GetLocationsOfBlocksWithType(const EBuildingBlockType BlockType, const TSubclassOf<ARoomTemplate> RoomType, TArray<FIntPoint>& BlockLocations);
 
@@ -38,7 +44,9 @@ protected:
 
 #if WITH_EDITOR
 private:
+	/** Update the table with building block positions */
 	void UpdateBlockPlacementTable();
+	/** Callback for UPackage::PackageSavedEvent */
 	void OnPackageSaved(const FString& PackageFileName, UObject* PackageObj);
 #endif
 
@@ -49,15 +57,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The paths guards can follow in this room"))
 	TArray<UGuardPatrolPathComponent*> GuardPaths;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The table to store building block placement positions in. Should use BuildingBlockPlacementStruct as row structure"))
 	class UDataTable* BuildingBlockPlacementTable;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class to use for pick-ups"))
+	TSubclassOf<APickUpBase> PickupClass;
 	
 protected:
+	/** The bounds of the room */
 	class UBoxComponent* RoomBounds;
 
 #if WITH_EDITOR
 private:
+	/** The name of the class, without _C suffix */
 	FString ClassName;
+	/** Set to true if the building block placement table has been modified but has not been saved since */
 	bool BuildingBlockPlacementTableIsDirty = false;
 #endif
 };

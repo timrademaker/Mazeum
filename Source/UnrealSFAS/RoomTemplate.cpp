@@ -91,6 +91,32 @@ void ARoomTemplate::ConvertToRoom(const FRoomPlacement& RoomPlacement)
 	TArray<USceneComponent*> components;
 	RoomBounds->GetChildrenComponents(true, components);
 
+	if (RoomPlacement.RoomContainsTargetItem)
+	{
+		TArray<size_t> stealableIndices;
+
+		// Find all items that could be the target item
+		for (size_t i = 0; i < components.Num(); ++i)
+		{
+			UBuildingBlockMeshComponent* componentAsBuildingBlock = Cast<UBuildingBlockMeshComponent>(components[i]);
+			if (!componentAsBuildingBlock)
+			{
+				continue;
+			}
+
+			if (componentAsBuildingBlock->BuildingBlockType == EBuildingBlockType::Stealable)
+			{
+				stealableIndices.Add(i);
+			}
+		}
+		
+		check(stealableIndices.Num() > 0 && "This room doesn't contain any items that can be set as the target item!");
+
+		// Pick a random item from the possible target items
+		const size_t targetItemIndex = stealableIndices[FMath::RandRange(0, stealableIndices.Num() - 1)];
+		Cast<UBuildingBlockMeshComponent>(components[targetItemIndex])->ActorEquivalent = PickupClass;
+	}
+
 	for (USceneComponent* comp : components)
 	{
 		UBuildingBlockMeshComponent* componentAsBuildingBlock = Cast<UBuildingBlockMeshComponent>(comp);
