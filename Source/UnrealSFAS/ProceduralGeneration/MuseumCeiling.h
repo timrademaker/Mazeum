@@ -16,8 +16,12 @@ public:
 	// Sets default values for this actor's properties
 	AMuseumCeiling();
 
-	/** Place ceiling tiles based on a grid */
-	void PlaceCeiling(const class FMapGrid& Grid);
+	/** 
+	 * Place ceiling tiles based on a grid
+	 * @param HallMask The museum's hall mask
+	 * @param RoomMask The museum's room mask
+	 */
+	void PlaceCeiling(const class FMapGrid& HallMask, const class FMapGrid& RoomMask);
 
 public:
 	UPROPERTY(EditDefaultsOnly)

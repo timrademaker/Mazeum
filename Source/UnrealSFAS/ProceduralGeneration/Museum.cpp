@@ -29,25 +29,25 @@ void AMuseum::BeginPlay()
 	Super::BeginPlay();
 
 	FMapGrid hallMask;
+	FMapGrid roomMask;
 	FMapGrid ventEntranceMask;
 	FMapGrid ventMask;
 	FMapGrid doorMask;
 	TArray<FRoomPlacement> roomPlacement;
 
-	FMuseumGenerator::GenerateMuseum(PossibleRooms, roomPlacement, hallMask, ventEntranceMask, doorMask, ventMask);
-
+	FMuseumGenerator::GenerateMuseum(PossibleRooms, roomPlacement, hallMask, roomMask, ventEntranceMask, doorMask, ventMask);
 
 	// Create floor actor
 	AMuseumFloor* floor = GetWorld()->SpawnActor<AMuseumFloor>(MuseumFloorClass);
 	floor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	floor->SetActorRelativeLocation(FVector(0.0f));
-	floor->PlaceFloor(hallMask);
+	floor->PlaceFloor(hallMask, roomMask, ventEntranceMask, ventMask);
 
 	// Create ceiling actor
 	AMuseumCeiling* ceiling = GetWorld()->SpawnActor<AMuseumCeiling>(MuseumCeilingClass);
 	ceiling->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	ceiling->SetActorRelativeLocation(FVector(0.0f));
-	ceiling->PlaceCeiling(hallMask);
+	ceiling->PlaceCeiling(hallMask, roomMask);
 
 	// Create walls actor
 	AMuseumWalls* walls = GetWorld()->SpawnActor<AMuseumWalls>(MuseumWallsClass);

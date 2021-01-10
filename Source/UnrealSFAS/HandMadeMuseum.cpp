@@ -14,21 +14,16 @@ void AHandMadeMuseum::BeginPlay()
 	// Skip AMuseum's BeginPlay, but do call that of its parent
 	Super::Super::BeginPlay();
 
-	FMapGrid hallMask;
-	FMapGrid ventEntranceMask;
-	FMapGrid ventMask;
-	FMapGrid doorMask;
+	FMapGrid emptyGrid(10, 11);
 
-	hallMask = FMapGrid(10, 11);
+	FMapGrid hallMask(10, 11);
 	hallMask.SetRow(3, 0b1100000000);
 	hallMask.SetRow(4, 0b1111111111);
 	hallMask.SetRow(5, 0b1111111111);
 	hallMask.SetRow(6, 0b1111111111);
 	hallMask.SetRow(7, 0b1100000000);
 
-
 	FMapGrid ceilingMask = FMapGrid(10, 11);
-
 	ceilingMask.SetRow(0, 0b0011111100);
 	ceilingMask.SetRow(1, 0b0011111100);
 	ceilingMask.SetRow(2, 0b0011111100);
@@ -41,11 +36,11 @@ void AHandMadeMuseum::BeginPlay()
 	ceilingMask.SetRow(9, 0b0011111111);
 	ceilingMask.SetRow(10, 0b0011111100);
 
-	doorMask = FMapGrid(10, 11);
+	FMapGrid doorMask(10, 11);
 	doorMask.SetRow(3, 0b0001001000);
 	doorMask.SetRow(7, 0b0001001010);
 
-	ventMask = FMapGrid(10, 11);
+	FMapGrid ventMask(10, 11);
 	ventMask.SetRow(2, 0b0000000000);
 	ventMask.SetRow(3, 0b0000001100);
 	ventMask.SetRow(4, 0b0000011110);
@@ -60,12 +55,12 @@ void AHandMadeMuseum::BeginPlay()
 	// Create floor actor
 	AMuseumFloor* floor = GetWorld()->SpawnActor<AMuseumFloor>(MuseumFloorClass);
 	floor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-	floor->PlaceFloor(hallMask);
+	floor->PlaceFloor(hallMask, emptyGrid, emptyGrid, emptyGrid);
 
 	// Create ceiling actor
 	AMuseumCeiling* ceiling = GetWorld()->SpawnActor<AMuseumCeiling>(MuseumCeilingClass);
 	ceiling->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-	ceiling->PlaceCeiling(ceilingMask);
+	ceiling->PlaceCeiling(ceilingMask, emptyGrid);
 
 	// Create walls actor
 	AMuseumWalls* walls = GetWorld()->SpawnActor<AMuseumWalls>(MuseumWallsClass);

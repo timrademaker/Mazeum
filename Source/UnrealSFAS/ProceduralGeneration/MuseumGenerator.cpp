@@ -1,6 +1,6 @@
 #include "MuseumGenerator.h"
 
-void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
+void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutRoomMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
 {
 	// Should this function also place the museum? Then AMuseum can strictly be the class holding actors
 	// Issue: This class has no variables, but would need the BP class for walls/floor/ceiling etc
@@ -9,9 +9,9 @@ void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& 
 	const unsigned int mapWidth = OutHallMask.GetWidth();
 	const unsigned int mapDepth = OutHallMask.GetDepth();
 
-	FMapGrid roomMask(mapWidth, mapDepth);
+	OutRoomMask = FMapGrid(mapWidth, mapDepth);
 
-	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, roomMask);
+	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, OutRoomMask);
 	
 	// Select a pair of rooms to use as target and connector
 	check(OutRoomPlacement.Num() > 1 && "Can't create anything that plays like a game if there's just a single room");

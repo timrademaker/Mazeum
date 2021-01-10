@@ -13,7 +13,7 @@ AMuseumFloor::AMuseumFloor()
 
 }
 
-void AMuseumFloor::PlaceFloor(const FMapGrid& Grid)
+void AMuseumFloor::PlaceFloor(const FMapGrid& HallMask, const FMapGrid& RoomMask, const FMapGrid& VentEntranceMask, const FMapGrid& VentMask)
 {
 	if (FloorTileMeshComponent)
 	{
@@ -21,22 +21,22 @@ void AMuseumFloor::PlaceFloor(const FMapGrid& Grid)
 		const float blockZPos = GetActorLocation().Z;
 
 		FVector2D blockPos(0.0f);
-		const FIntPoint gridSize(Grid.GetWidth(), Grid.GetDepth());
+		const FIntPoint gridSize(HallMask.GetWidth(), HallMask.GetDepth());
 
 		USceneComponent* rootComponent = GetRootComponent();
 
 		// Loop through the binary values to generate the floor tiles as static mesh components attached to the root of this actor
-		for (int32 i = 0; i < gridSize.Y; i++)
+		for (int32 y = 0; y < gridSize.Y; y++)
 		{
-			for (int32 j = 0; j < gridSize.X; j++)
+			for (int32 x = 0; x < gridSize.X; x++)
 			{
-				if (Grid.IsEmpty(j, i))
+				if ((HallMask.IsEmpty(x, y) && RoomMask.IsEmpty(x, y) && VentMask.IsEmpty(x, y)) || !VentEntranceMask.IsEmpty(x, y))
 				{
 					continue;
 				}
 
-				blockPos.X = (static_cast<float>(j) + FloorComponentAlignment.X) * blockSize.X;
-				blockPos.Y = (static_cast<float>(i) + FloorComponentAlignment.Y) * blockSize.Y;
+				blockPos.X = (static_cast<float>(x) + FloorComponentAlignment.X) * blockSize.X;
+				blockPos.Y = (static_cast<float>(y) + FloorComponentAlignment.Y) * blockSize.Y;
 
 				const FVector worldPosition(blockPos, blockZPos);
 

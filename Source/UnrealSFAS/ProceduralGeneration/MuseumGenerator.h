@@ -21,11 +21,12 @@ public:
 	 * @param PossibleRooms An array of rooms that could be placed in the museum
 	 * @param OutRoomPlacement An array in which the placement of rooms for this museum layout is put
 	 * @param OutHallMask A grid on which the generated halls are filled
+	 * @param OutRoomMask A grid on which the generated rooms are filled
 	 * @param OutVentEntranceMask A grid on which the generated vent entrances are filled
 	 * @param OutDoorMask A grid on which the generated doors are filled
 	 * @param OutVentMask A grid on which the generated vent layout is filled
 	 */
-	static void GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask);
+	static void GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutRoomMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask);
 
 private:
 	FMuseumGenerator() = default;
