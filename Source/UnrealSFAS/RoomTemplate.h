@@ -11,9 +11,6 @@
 #include "RoomTemplate.generated.h"
 
 
-class UBoxComponent;
-class UDataTable;
-
 UCLASS()
 class UNREALSFAS_API ARoomTemplate : public AActor
 {
@@ -31,9 +28,9 @@ public:
 
 	/**
 	 * Convert this room's components to actors, if possible
-	 * @param RoomRotation The rotation of the room, as specified in FRoomPlacement
+	 * @param RoomPlacement The room placement info
 	 */
-	void ConvertToRoom(const FRotator& RoomRotation);
+	void ConvertToRoom(const struct FRoomPlacement& RoomPlacement);
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,10 +50,10 @@ public:
 	TArray<UGuardPatrolPathComponent*> GuardPaths;
 
 	UPROPERTY(EditDefaultsOnly)
-	UDataTable* BuildingBlockPlacementTable;
+	class UDataTable* BuildingBlockPlacementTable;
 	
 protected:
-	UBoxComponent* RoomBounds;
+	class UBoxComponent* RoomBounds;
 
 #if WITH_EDITOR
 private:

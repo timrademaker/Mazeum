@@ -6,14 +6,16 @@
 #include "BuildingBlockPlacementStruct.h"
 #include "ConstantsFunctionLibrary.h"
 #include "StealthGameMode.h"
+#include "Gameplay/Lasers.h"
+#include "ProceduralGeneration/RoomPlacement.h"
 #include "RoomBuildingBlocks/BuildingBlockMeshComponent.h"
 
-
 #include "Components/BoxComponent.h"
+#include "Engine/DataTable.h"
+
 #if WITH_EDITOR
 #include "EditorAssetLibrary.h"
 #endif
-#include "Engine/DataTable.h"
 
 
 // Sets default values
@@ -77,13 +79,11 @@ void ARoomTemplate::GetLocationsOfBlocksWithType(const EBuildingBlockType BlockT
 			}
 		}
 	}
-
-	return;
 }
 
-void ARoomTemplate::ConvertToRoom(const FRotator& RoomRotation)
+void ARoomTemplate::ConvertToRoom(const FRoomPlacement& RoomPlacement)
 {
-	RoomBounds->SetRelativeRotation(RoomRotation);
+	RoomBounds->SetRelativeRotation(RoomPlacement.Rotation);
 
 	// Convert room components to actors
 	// For each component

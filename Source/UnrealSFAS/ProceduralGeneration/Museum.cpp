@@ -7,6 +7,7 @@
 #include "RoomPlacement.h"
 #include "../ConstantsFunctionLibrary.h"
 #include "../MapGrid.h"
+#include "../RoomTemplate.h"
 
 #include "MuseumCeiling.h"
 #include "MuseumFloor.h"
@@ -109,7 +110,7 @@ void AMuseum::PlaceRooms(const TArray<FRoomPlacement>& Rooms)
 
 		// Spawn actor and convert to an actual room
 		ARoomTemplate* r = GetWorld()->SpawnActor<ARoomTemplate>(room.RoomType, roomLocation, GetActorRotation());
-		r->ConvertToRoom(room.Rotation);
+		r->ConvertToRoom(room);
 		r->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 
 	}
