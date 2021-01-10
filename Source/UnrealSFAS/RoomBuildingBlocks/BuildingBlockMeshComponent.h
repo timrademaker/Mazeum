@@ -13,7 +13,8 @@ enum class EBuildingBlockType : uint8
 {
     Other = 0,
     Door,
-    Vent
+    Vent,
+    Stealable
 };
 
 /**
