@@ -6,22 +6,31 @@ void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& 
 	// Issue: This class has no variables, but would need the BP class for walls/floor/ceiling etc
 
 	OutHallMask = FMuseumGenerator::SelectMuseumLayout();
-	FMapGrid roomMask(OutHallMask.GetWidth(), OutHallMask.GetDepth());
+	const unsigned int mapWidth = OutHallMask.GetWidth();
+	const unsigned int mapDepth = OutHallMask.GetDepth();
+
+	FMapGrid roomMask(mapWidth, mapDepth);
 
 	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, roomMask);
-	OutVentEntranceMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Vent, OutHallMask.GetWidth(), OutHallMask.GetDepth());
 	
-	OutDoorMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Door, OutHallMask.GetWidth(), OutHallMask.GetDepth());
+	// Select a pair of rooms to use as target and connector
+	check(OutRoomPlacement.Num() > 1 && "Can't create anything that plays like a game if there's just a single room");
+	
+	const uint8 targetRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
+	uint8 connectorRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
 
-	/*
-	OutVentMask = FMuseumGenerator::GenerateVentLayout(ventEntranceMask);
-	// TODO: Verify layout
-
-	while (!FMuseumGenerator::LayoutIsValid(OutHallMask, OutRoomMask, OutVentMask))
+	while (connectorRoomIndex == targetRoomIndex)
 	{
-		OutVentMask = FMuseumGenerator::GenerateVentLayout(ventEntranceMask);
+		connectorRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
 	}
-	*/
+
+	OutRoomPlacement[targetRoomIndex].RoomContainsTargetItem = true;
+	OutRoomPlacement[connectorRoomIndex].LasersAreEnabled = false;
+
+	OutDoorMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Door, mapWidth, mapDepth);
+	
+
+	GenerateVentLayout(mapWidth, mapDepth, OutRoomPlacement, OutVentMask, OutVentEntranceMask);
 }
 
 FMapGrid FMuseumGenerator::SelectMuseumLayout()
@@ -183,18 +192,91 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 	}
 }
 
-FMapGrid FMuseumGenerator::GenerateVentLayout(const FMapGrid& VentEntranceMask)
+void FMuseumGenerator::GenerateVentLayout(const uint8 MaskWidth, const uint8 MaskDepth, const TArray<FRoomPlacement>& RoomPlacement, FMapGrid& OutVentMask, FMapGrid& OutVentEntranceMask)
 {
-	// TODO: Implement
-	check(false);
-	return FMapGrid();
+	OutVentEntranceMask = FMuseumGenerator::CreateBuildingBlockMask(RoomPlacement, EBuildingBlockType::Vent, MaskWidth, MaskDepth);
+	OutVentMask = FMapGrid(MaskWidth, MaskDepth);
+
+	TArray<FIntPoint> allVentEntrances;
+
+	// Find the vent that all rooms should connect to
+	FIntPoint connectorRoomVentLocation;
+
+	for (const FRoomPlacement& room : RoomPlacement)
+	{
+		if (!room.LasersAreEnabled)
+		{
+			TArray<FIntPoint> ventEntrances;
+			FindBuildingBlockLocations(room, EBuildingBlockType::Vent, ventEntrances);
+			
+			check(ventEntrances.Num() > 0 && "Every room should have a vent entrance. If they do, the vent couldn't be found for some reason.");
+
+			// Just take the first entrance, regardless of how many there are
+			connectorRoomVentLocation = ventEntrances[0];
+
+			break;
+		}
+	}
+
+	// Connect all vents with the connecting room
+	for (uint8 x = 0; x < MaskWidth; ++x)
+	{
+		for (uint8 y = 0; y < MaskDepth; ++y)
+		{
+			if (!OutVentEntranceMask.IsEmpty(x, y))
+			{
+				FIntPoint thisVentLocation(x, y);
+				ConnectVents(thisVentLocation, connectorRoomVentLocation, OutVentMask);
+
+				allVentEntrances.Add(thisVentLocation);
+			}
+		}
+	}
+
+	// Pick some extra vents to connect, in an attempt to make the game a bit more interesting
+	const uint8 extraConnections = FMath::RandRange(allVentEntrances.Num() / 4, allVentEntrances.Num());
+
+	for (uint8 i = 0; i < extraConnections; ++i)
+	{
+		// Pick random pairs of vents to connect
+		const uint8 fromVentIndex = FMath::RandHelper(allVentEntrances.Num());
+		uint8 toVentIndex = FMath::RandHelper(allVentEntrances.Num());
+		while (toVentIndex == fromVentIndex)
+		{
+			toVentIndex = FMath::RandHelper(allVentEntrances.Num());
+		}
+
+		ConnectVents(allVentEntrances[fromVentIndex], allVentEntrances[toVentIndex], OutVentMask);
+	}
 }
 
-bool FMuseumGenerator::LayoutIsValid(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, const FMapGrid& VentLayout)
+void FMuseumGenerator::ConnectVents(const FIntPoint& FromVent, const FIntPoint& ToVent, FMapGrid& VentMask)
 {
-	// TODO: Implement
-	check(false);
-	return true;
+	// Determine in which direction the connection should be placed (i.e. positive or negative direction)
+	const FIntPoint direction(
+		FromVent.X < ToVent.X ? 1 : -1,
+		FromVent.Y < ToVent.Y ? 1 : -1
+	);
+
+	// Pick a random direction to connect first (0 means X, 1 means Y)
+	uint8 indexToConnect = FMath::RandBool() ? 1 : 0;
+
+	FIntPoint currentPosition = FromVent;
+
+	for (uint8 i = 0; i < 2; ++i)
+	{
+		while (currentPosition[indexToConnect] != ToVent[indexToConnect])
+		{
+			VentMask.Set(currentPosition.X, currentPosition.Y, true);
+			
+			currentPosition[indexToConnect] += direction[indexToConnect];
+		}
+
+		// Flip the index
+		indexToConnect = ~indexToConnect & 1;
+	}
+
+	VentMask.Set(ToVent.X, ToVent.Y, true);
 }
 
 unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction)

@@ -47,13 +47,22 @@ private:
 	static void GenerateRoomPlacement(const FMapGrid& MuseumLayout, const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutRoomMask);
 	/** 
 	 * Generate the layout of the vents based on vent entrances
-	 * @param VentEntranceMask A grid with the locations of vent entrances filled
-	 * @return A grid with the locations of the vents filled
+	 * @param MaskWidth The width of the mask to place the vents on
+	 * @param MaskDepth The depth of the mask to place the vents on
+	 * @param GridDimensions The dimensions of the museum grid
+	 * @param RoomPlacement The rooms to be placed in the world
+	 * @param OutVentEntranceMask A grid with the locations of vent entrances filled
+	 * @param OutVentMask A grid with the locations of the vents filled
 	 */
-	static FMapGrid GenerateVentLayout(const FMapGrid& VentEntranceMask);
+	static void GenerateVentLayout(const uint8 MaskWidth, const uint8 MaskDepth, const TArray<FRoomPlacement>& RoomPlacement, FMapGrid& OutVentMask, FMapGrid& OutVentEntranceMask);
 
-	/* Verification */
-	static bool LayoutIsValid(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, const FMapGrid& VentLayout);
+	/**
+	 * Connect two vents
+	 * @param FromVent The coordinates of the vent to connect to ToVent
+	 * @param ToVent The coordinates of the vent to connect to FromVent
+	 * @param VentMask The vent mask to write to. Will not be cleared before use.
+	 */
+	static void ConnectVents(const FIntPoint& FromVent, const FIntPoint& ToVent, FMapGrid& VentMask);
 
 	/* Helpers */
 	/**
