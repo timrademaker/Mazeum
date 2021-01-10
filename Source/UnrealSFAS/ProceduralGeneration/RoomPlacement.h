@@ -17,4 +17,6 @@ struct UNREALSFAS_API FRoomPlacement
     FIntVector Position;
     FRotator Rotation;
     EDirection Direction;
+    bool LasersAreEnabled;
+    bool RoomContainsTargetItem;
 };

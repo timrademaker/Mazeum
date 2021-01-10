@@ -111,6 +111,11 @@ void ARoomTemplate::ConvertToRoom(const FRoomPlacement& RoomPlacement)
 			obj->AddActorLocalTransform(RoomBounds->GetRelativeTransform());
 			obj->AddActorLocalTransform(comp->GetRelativeTransform());
 
+			if (componentAsBuildingBlock->BuildingBlockType == EBuildingBlockType::Door)
+			{
+				Cast<ALasers>(obj)->SetLasersEnabled(RoomPlacement.LasersAreEnabled);
+			}
+
 			// Remove component from room template actor
 			comp->UnregisterComponent();
 		}
