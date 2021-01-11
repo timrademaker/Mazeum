@@ -2,9 +2,6 @@
 
 void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutRoomMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
 {
-	// Should this function also place the museum? Then AMuseum can strictly be the class holding actors
-	// Issue: This class has no variables, but would need the BP class for walls/floor/ceiling etc
-
 	OutHallMask = FMuseumGenerator::SelectMuseumLayout();
 	const unsigned int mapWidth = OutHallMask.GetWidth();
 	const unsigned int mapDepth = OutHallMask.GetDepth();
@@ -13,24 +10,14 @@ void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& 
 
 	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, OutRoomMask);
 	
-	// Select a pair of rooms to use as target and connector
-	check(OutRoomPlacement.Num() > 1 && "Can't create anything that plays like a game if there's just a single room");
-	
-	const uint8 targetRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
-	uint8 connectorRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
-
-	while (connectorRoomIndex == targetRoomIndex)
-	{
-		connectorRoomIndex = FMath::RandHelper(OutRoomPlacement.Num());
-	}
-
-	OutRoomPlacement[targetRoomIndex].RoomContainsTargetItem = true;
-	OutRoomPlacement[connectorRoomIndex].LasersAreEnabled = false;
+	FMuseumGenerator::SetUpTargetRoom(OutRoomPlacement);
 
 	OutDoorMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Door, mapWidth, mapDepth);
 	
 
-	GenerateVentLayout(mapWidth, mapDepth, OutRoomPlacement, OutVentMask, OutVentEntranceMask);
+	FMuseumGenerator::GenerateVentLayout(mapWidth, mapDepth, OutRoomPlacement, OutVentMask, OutVentEntranceMask);
+
+	FMuseumGenerator::RandomizeRooms(OutRoomPlacement);
 }
 
 FMapGrid FMuseumGenerator::SelectMuseumLayout()
@@ -38,6 +25,8 @@ FMapGrid FMuseumGenerator::SelectMuseumLayout()
     //// TODO: Implement properly
 
 	FMapGrid grid(17, 15);
+	grid.Set(0, 0, true);
+	grid.SetRow(1, 0b111111111111);
 	grid.SetRow(5, 0b111111110000);
 	grid.SetRow(6, 0b100000010000);
 	grid.SetRow(7, 0b100000010000);
@@ -240,11 +229,11 @@ void FMuseumGenerator::GenerateVentLayout(const uint8 MaskWidth, const uint8 Mas
 	{
 		// Pick random pairs of vents to connect
 		const uint8 fromVentIndex = FMath::RandHelper(allVentEntrances.Num());
-		uint8 toVentIndex = FMath::RandHelper(allVentEntrances.Num());
-		while (toVentIndex == fromVentIndex)
+		uint8 toVentIndex;
+		do
 		{
 			toVentIndex = FMath::RandHelper(allVentEntrances.Num());
-		}
+		} while (toVentIndex == fromVentIndex);
 
 		ConnectVents(allVentEntrances[fromVentIndex], allVentEntrances[toVentIndex], OutVentMask);
 	}
@@ -277,6 +266,51 @@ void FMuseumGenerator::ConnectVents(const FIntPoint& FromVent, const FIntPoint& 
 	}
 
 	VentMask.Set(ToVent.X, ToVent.Y, true);
+}
+
+void FMuseumGenerator::SetUpTargetRoom(TArray<FRoomPlacement>& RoomPlacement)
+{
+	check(RoomPlacement.Num() > 1 && "Can't create anything that plays like a game if there's just a single room");
+
+	const uint8 targetRoomIndex = FMath::RandHelper(RoomPlacement.Num());
+	uint8 connectorRoomIndex;
+
+	do
+	{
+		connectorRoomIndex = FMath::RandHelper(RoomPlacement.Num());
+	} while (connectorRoomIndex == targetRoomIndex);
+
+	RoomPlacement[targetRoomIndex].RoomContainsTargetItem = true;
+	RoomPlacement[connectorRoomIndex].LasersAreEnabled = false;
+}
+
+void FMuseumGenerator::RandomizeRooms(TArray<FRoomPlacement>& RoomPlacement, const uint8 MaximumLaserDisablePercentage)
+{
+	const uint8 numLasersToDisable = FMath::RandRange(0, (MaximumLaserDisablePercentage * RoomPlacement.Num()) / 100);
+	
+	// Get all room indices that can be chosen from
+	TArray<uint8> roomIndices;
+	roomIndices.Reserve(RoomPlacement.Num() - 1);
+	for (uint8 i = 0; i < RoomPlacement.Num(); ++i)
+	{
+		if (!RoomPlacement[i].RoomContainsTargetItem)
+		{
+			roomIndices.Add(i);
+		}
+	}
+
+	for (uint8 i = 0; i < numLasersToDisable; ++i)
+	{
+		// Pick the index of a room index in roomIndices
+		const uint8 roomIndexIndex = FMath::RandHelper(roomIndices.Num());
+		// Get the associated room index
+		const uint8 disableLasersInRoomWithIndex = roomIndices[roomIndexIndex];
+		// Disable lasers in the chosen room
+		RoomPlacement[disableLasersInRoomWithIndex].LasersAreEnabled = false;
+
+		// Make sure the room isn't picked again
+		roomIndices.RemoveAt(roomIndexIndex);
+	}
 }
 
 unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction)

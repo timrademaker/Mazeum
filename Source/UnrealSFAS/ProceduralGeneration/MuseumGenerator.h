@@ -56,7 +56,6 @@ private:
 	 * @param OutVentMask A grid with the locations of the vents filled
 	 */
 	static void GenerateVentLayout(const uint8 MaskWidth, const uint8 MaskDepth, const TArray<FRoomPlacement>& RoomPlacement, FMapGrid& OutVentMask, FMapGrid& OutVentEntranceMask);
-
 	/**
 	 * Connect two vents
 	 * @param FromVent The coordinates of the vent to connect to ToVent
@@ -64,6 +63,17 @@ private:
 	 * @param VentMask The vent mask to write to. Will not be cleared before use.
 	 */
 	static void ConnectVents(const FIntPoint& FromVent, const FIntPoint& ToVent, FMapGrid& VentMask);
+	/**
+	 * Set up the target room to have the target item, and select another room to be the "connector" room
+	 * @param RoomPlacement The rooms that can be chosen from
+	 */
+	static void SetUpTargetRoom(TArray<FRoomPlacement>& RoomPlacement);
+	/**
+	 * Randomize some things about rooms, like disabling lasers for a number of rooms
+	 * @param RoomPlacement The rooms to randomize
+	 * @param MaximumLaserDisablePercentage The maximum percentage of rooms in which to disable lasers, expressed as a value between 0 and 100
+	 */
+	static void RandomizeRooms(TArray<FRoomPlacement>& RoomPlacement, const uint8 MaximumLaserDisablePercentage = 25);
 
 	/* Helpers */
 	/**
