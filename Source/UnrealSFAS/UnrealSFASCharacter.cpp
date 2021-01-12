@@ -62,6 +62,8 @@ void AUnrealSFASCharacter::BeginPlay()
 	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UInteractableInterface::StaticClass(), Interactables);
 
 	StartTransform = GetActorTransform();
+	CameraBoomLengthStartLength = CameraBoom->TargetArmLength;
+	CameraBoomStartLocation = CameraBoom->GetRelativeLocation();
 }
 
 void AUnrealSFASCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -70,6 +72,11 @@ void AUnrealSFASCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHal
 
 	// Placeholder until I add animations
 	GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 0.5f));
+
+	if (IsInFirstPersonView)
+	{
+		ActivateFirstPersonCamera();
+	}
 }
 
 void AUnrealSFASCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -78,6 +85,11 @@ void AUnrealSFASCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfH
 
 	// Placeholder until I add animations
 	GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	if (IsInFirstPersonView)
+	{
+		ActivateFirstPersonCamera();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -114,6 +126,9 @@ void AUnrealSFASCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// Crouching
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AUnrealSFASCharacter::OnCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AUnrealSFASCharacter::OnUnCrouch);
+
+	// Switching view
+	PlayerInputComponent->BindAction("ToggleFirstPersonView", IE_Pressed, this, &AUnrealSFASCharacter::ToggleFirstPersonView);
 
 	// Pausing
 	FInputActionBinding& pauseToggle = PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AUnrealSFASCharacter::OnPause);
@@ -183,6 +198,46 @@ void AUnrealSFASCharacter::OnPause()
 	{
 		gm->TogglePause();
 	}
+}
+
+void AUnrealSFASCharacter::ToggleFirstPersonView()
+{
+	if (IsInFirstPersonView)
+	{
+		ActivateThirdPersonCamera();
+	}
+	else
+	{
+		ActivateFirstPersonCamera();
+	}
+}
+
+void AUnrealSFASCharacter::ActivateFirstPersonCamera()
+{
+	IsInFirstPersonView = true;
+
+	// Move the camera boom to the top of the capsule
+	CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+	
+	// Move the camera forward
+	CameraBoom->TargetArmLength = 0.0f;
+	
+	// Hide the player mesh
+	GetMesh()->SetHiddenInGame(true);
+}
+
+void AUnrealSFASCharacter::ActivateThirdPersonCamera()
+{
+	IsInFirstPersonView = false;
+
+	// Reset camera boom position
+	CameraBoom->SetRelativeLocation(CameraBoomStartLocation);
+
+	// Reset camera boom length
+	CameraBoom->TargetArmLength = CameraBoomLengthStartLength;
+
+	// Show the player mesh
+	GetMesh()->SetHiddenInGame(false);
 }
 
 void AUnrealSFASCharacter::TurnAtRate(float Rate)

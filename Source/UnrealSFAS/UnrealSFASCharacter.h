@@ -61,6 +61,15 @@ protected:
 	/**	Called via input when the player tries to (un)pause the game */
 	void OnPause();
 
+	/** Called via input to switch between first- and third-person views */
+	void ToggleFirstPersonView();
+
+	/** Switch to a first-person perspective */
+	void ActivateFirstPersonCamera();
+
+	/** Switch to a third-person perspective */
+	void ActivateThirdPersonCamera();
+
 protected:
 	// AActor interface
 	virtual void BeginPlay() override;
@@ -110,5 +119,13 @@ private:
 
 	/** The transform of the character when the game starts */
 	FTransform StartTransform;
+
+	/** The length of the camera boom when the game starts */
+	float CameraBoomLengthStartLength;
+	/** The relative location at which the camera boom starts */
+	FVector CameraBoomStartLocation;
+
+	/** Keep track of whether the player is viewing the game in first-person or not */
+	bool IsInFirstPersonView = false;
 };
 
