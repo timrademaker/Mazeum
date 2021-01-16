@@ -1,5 +1,7 @@
 #include "MuseumGenerator.h"
 
+#include "MuseumLayouts.h"
+
 void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutHallMask, FMapGrid& OutRoomMask, FMapGrid& OutVentEntranceMask, FMapGrid& OutDoorMask, FMapGrid& OutVentMask)
 {
 	OutHallMask = FMuseumGenerator::SelectMuseumLayout();
@@ -22,17 +24,11 @@ void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& 
 
 FMapGrid FMuseumGenerator::SelectMuseumLayout()
 {
-    //// TODO: Implement properly
+	const TArray<FMapGrid>& possibleLayouts = FMuseumLayouts::GetMuseumLayouts();
 
-	FMapGrid grid(17, 15);
-	grid.Set(0, 0, true);
-	grid.SetRow(1, 0b111111111111);
-	grid.SetRow(5, 0b111111110000);
-	grid.SetRow(6, 0b100000010000);
-	grid.SetRow(7, 0b100000010000);
-	grid.SetRow(8, 0b100000010000);
-	grid.SetRow(9, 0b111111110000);
-	return grid;
+	const uint8 layoutIndex = FMath::RandHelper(possibleLayouts.Num());
+
+	return possibleLayouts[layoutIndex];
 }
 
 void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const TArray<TSubclassOf<ARoomTemplate>>& PossibleRooms, TArray<FRoomPlacement>& OutRoomPlacement, FMapGrid& OutRoomMask)
