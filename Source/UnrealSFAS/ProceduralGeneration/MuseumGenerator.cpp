@@ -78,13 +78,12 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 				if (dir == EDirection::Left || dir == EDirection::Right)
 				{
 					emptyWidth = emptyTiles;
-					emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, EDirection::Down);
-
+					emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
 				}
 				else
 				{
 					emptyDepth = emptyTiles;
-					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, EDirection::Right);
+					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
 				}
 
 				// Find a suitable room for these dimensions
@@ -309,7 +308,7 @@ void FMuseumGenerator::RandomizeRooms(TArray<FRoomPlacement>& RoomPlacement, con
 	}
 }
 
-unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction)
+unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection SearchDirection)
 {
 	int emptyTiles = 0;
 
@@ -324,15 +323,15 @@ unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLa
 	{
 		++emptyTiles;
 
-		if (Direction == EDirection::Left)
+		if (SearchDirection == EDirection::Left)
 		{
 			--X;
 		}
-		else if (Direction == EDirection::Right)
+		else if (SearchDirection == EDirection::Right)
 		{
 			++X;
 		}
-		else if (Direction == EDirection::Up)
+		else if (SearchDirection == EDirection::Up)
 		{
 			--Y;
 		}
@@ -345,8 +344,37 @@ unsigned int FMuseumGenerator::ContiguousEmptyTileCount(const FMapGrid& MuseumLa
 	return emptyTiles;
 }
 
-unsigned int FMuseumGenerator::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction)
+unsigned int FMuseumGenerator::ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection EmptyTileDirection)
 {
+	// The offset to move by with each step (e.g. (1, 0) means we are looking for unoccupied walls to the right)
+	FIntPoint searchOffset(1, 0);
+
+	if (EmptyTileDirection == EDirection::Left || EmptyTileDirection == EDirection::Right)
+	{
+		//searchDirection = EDirection::Down;
+		searchOffset = FIntPoint(0, 1);
+	}
+
+	// The offset in which to check for walls (e.g. (-1, 0) means that we are looking for blocking walls on the left of X, Y)
+	FIntPoint wallCheckOffset;
+
+	if (EmptyTileDirection == EDirection::Left)
+	{
+		wallCheckOffset = FIntPoint(-1, 0);
+	}
+	else if (EmptyTileDirection == EDirection::Right)
+	{
+		wallCheckOffset = FIntPoint(1, 0);
+	}
+	else if (EmptyTileDirection == EDirection::Up)
+	{
+		wallCheckOffset = FIntPoint(0, -1);
+	}
+	else
+	{
+		wallCheckOffset = FIntPoint(0, 1);
+	}
+
 	int unoccupiedWallCount = 0;
 
 	const int maxX = MuseumLayout.GetWidth() - 1;
@@ -355,27 +383,14 @@ unsigned int FMuseumGenerator::ContiguousUnoccupiedWallCount(const FMapGrid& Mus
 	while (X >= 0 && X <= maxX
 		&& Y >= 0 && Y <= maxY
 		&& !MuseumLayout.IsEmpty(X, Y)
-		&& (RoomMask.IsEmpty(X - 1, Y) || RoomMask.IsEmpty(X + 1, Y) || RoomMask.IsEmpty(X, Y - 1) || RoomMask.IsEmpty(X, Y + 1))
+		&& MuseumLayout.IsEmpty(X + wallCheckOffset.X, Y + wallCheckOffset.Y)	// Check if there is a wall perpendicular to the wall we are checking
+		&& (RoomMask.IsEmpty(X - 1, Y) || RoomMask.IsEmpty(X + 1, Y) || RoomMask.IsEmpty(X, Y - 1) || RoomMask.IsEmpty(X, Y + 1))	// Check if there is a room next to the wall we are checking
 		)
 	{
 		++unoccupiedWallCount;
 
-		if (Direction == EDirection::Left)
-		{
-			--X;
-		}
-		else if (Direction == EDirection::Right)
-		{
-			++X;
-		}
-		else if (Direction == EDirection::Up)
-		{
-			--Y;
-		}
-		else
-		{
-			++Y;
-		}
+		X += searchOffset.X;
+		Y += searchOffset.Y;
 	}
 
 	return unoccupiedWallCount;

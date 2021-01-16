@@ -82,20 +82,20 @@ private:
 	 * @param RoomMask The room mask for the museum
 	 * @param X The x-coordinate from where counting should start. Should be an empty tile.
 	 * @param Y The y-coordinate from where counting should start. Should be an empty tile.
-	 * @param Direction The direction in which to check for empty tiles
+	 * @param SearchDirection The direction in which to check for empty tiles
 	 * @return The number of consecutive empty tiles in a direction, starting from X and Y (including X and Y)
 	 */
-	static unsigned int ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction);
+	static unsigned int ContiguousEmptyTileCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection SearchDirection);
 	/**
 	 * Find the number of consecutive tiles that have no adjacent tiles in a certain direction
 	 * @param MuseumLayout The hall layout of the museum
 	 * @param RoomMask The room mask for the museum
 	 * @param X The x-coordinate from where counting should start. Should be a filled tile.
 	 * @param Y The y-coordinate from where counting should start. Should be a filled tile.
-	 * @param Direction The direction in which to check for unoccupied walls
+	 * @param Direction The direction in which empty tiles were found
 	 * @return The number of consecutive unoccupied walls in a direction, starting from X and Y (including X and Y)
 	 */
-	static unsigned int ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection Direction);
+	static unsigned int ContiguousUnoccupiedWallCount(const FMapGrid& MuseumLayout, const FMapGrid& RoomMask, int X, int Y, const EDirection EmptyTileDirection);
 	/**
 	 * Get a (random) room that fits within specified dimensions
 	 * @param PossibleRooms An array of possible rooms
