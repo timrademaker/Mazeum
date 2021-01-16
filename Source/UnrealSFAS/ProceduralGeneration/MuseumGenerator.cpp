@@ -490,8 +490,8 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 			}
 
 			if (!hasFoundRoom
-				&& (PlacementDirection == EDirection::Right && !possibleRoomShouldBeRotated)
-				|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down)))
+				&& ((PlacementDirection == EDirection::Right && !possibleRoomShouldBeRotated)
+					|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Up || PlacementDirection == EDirection::Down))))
 			{
 				for (const auto& door : roomDoors)
 				{
@@ -535,8 +535,8 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 			}
 
 			if (!hasFoundRoom
-				&& (PlacementDirection == EDirection::Up && !possibleRoomShouldBeRotated)
-				|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
+				&& ((PlacementDirection == EDirection::Up && !possibleRoomShouldBeRotated)
+					|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right))))
 			{
 				for (const auto& door : roomDoors)
 				{
@@ -580,8 +580,8 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 			}
 
 			if (!hasFoundRoom
-				&& (PlacementDirection == EDirection::Down && !possibleRoomShouldBeRotated)
-				|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right)))
+				&& ((PlacementDirection == EDirection::Down && !possibleRoomShouldBeRotated)
+					|| ((possibleRoomShouldBeRotated || possibleRoomCanBeRotated) && (PlacementDirection == EDirection::Left || PlacementDirection == EDirection::Right))))
 			{
 				for (const auto& door : roomDoors)
 				{
