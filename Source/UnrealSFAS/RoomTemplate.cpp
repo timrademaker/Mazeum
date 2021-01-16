@@ -139,7 +139,11 @@ void ARoomTemplate::ConvertToRoom(const FRoomPlacement& RoomPlacement)
 
 			if (componentAsBuildingBlock->BuildingBlockType == EBuildingBlockType::Door)
 			{
-				Cast<ALasers>(obj)->SetLasersEnabled(RoomPlacement.LasersAreEnabled);
+				ALasers* blockAsLasers = Cast<ALasers>(obj);
+				if (blockAsLasers)
+				{
+					blockAsLasers->SetLasersEnabled(RoomPlacement.LasersAreEnabled);
+				}
 			}
 
 			// Remove component from room template actor
