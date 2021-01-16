@@ -406,7 +406,6 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 	OutRoom = nullptr;
 	OutRoomRotation = FRotator(0.0f, 0.0f, 0.0f);
 
-
 	UClass* possibleRoom = nullptr;
 	bool possibleRoomShouldBeRotated = false;
 	bool possibleRoomCanBeRotated = false;
@@ -414,12 +413,26 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 
 	TArray<FIntPoint> roomDoors;
 
-	for (size_t i = 0; i < PossibleRooms.Num() && !hasFoundRoom; ++i)
+	// Shuffle the rooms so we don't always end up picking the same ones
+	TArray<TSubclassOf<ARoomTemplate>> shuffledRoomTemplates = PossibleRooms;
+	const int32 lastArrayIndex = shuffledRoomTemplates.Num() - 1;
+	for (int32 i = 0; i <= lastArrayIndex; ++i)
 	{
-		auto size = Cast<ARoomTemplate>(PossibleRooms[i]->GetDefaultObject())->RoomSize;
+		int32 swapIndex = FMath::RandRange(i, lastArrayIndex);
+		if (swapIndex != i)
+		{
+			shuffledRoomTemplates.Swap(i, swapIndex);
+		}
+	}
+
+	// Go over all rooms and see if a fitting room can be found
+	for (size_t i = 0; i < shuffledRoomTemplates.Num() && !hasFoundRoom; ++i)
+	{
+		ARoomTemplate* room = Cast<ARoomTemplate>(shuffledRoomTemplates[i]->GetDefaultObject());
+		auto size = room->RoomSize;
 		if (size.X <= Width && size.Y <= Depth)
 		{
-			possibleRoom = PossibleRooms[i];
+			possibleRoom = shuffledRoomTemplates[i];
 			possibleRoomShouldBeRotated = false;
 			possibleRoomCanBeRotated = false;
 		}
@@ -428,7 +441,7 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 		{
 			if (!possibleRoom)
 			{
-				possibleRoom = PossibleRooms[i];
+				possibleRoom = shuffledRoomTemplates[i];
 				possibleRoomShouldBeRotated = true;
 			}
 
@@ -438,7 +451,7 @@ void FMuseumGenerator::GetFittingRoom(const TArray<TSubclassOf<ARoomTemplate>>& 
 		if (possibleRoom)
 		{
 			roomDoors.Empty();
-			Cast<ARoomTemplate>(possibleRoom)->GetLocationsOfBlocksWithType(EBuildingBlockType::Door, possibleRoom, roomDoors);
+			room->GetLocationsOfBlocksWithType(EBuildingBlockType::Door, possibleRoom, roomDoors);
 
 			// Check left if:    Up/Down && rotated || dir == right && !rotated
 			// Check right if:   Up/Down && rotated || dir == left  && !rotated
