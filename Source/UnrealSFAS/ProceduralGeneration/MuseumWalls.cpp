@@ -36,58 +36,58 @@ void AMuseumWalls::PlaceWalls(const FMapGrid& HallGrid, const class FMapGrid& Do
 		walls.Reserve(4);
 
 		// Loop through the binary values to generate the wall tiles as static mesh components attached to the root of this actor
-		for (int32 i = 0; i < gridSize.Y; i++)
+		for (int32 y = 0; y < gridSize.Y; y++)
 		{
-			for (int32 j = 0; j < gridSize.X; j++)
+			for (int32 x = 0; x < gridSize.X; x++)
 			{
-				if (HallGrid.IsEmpty(j, i))
+				if (HallGrid.IsEmpty(x, y))
 				{
 					continue;
 				}
 
 				// Check left side of the tile
-				if (j == 0 || (HallGrid.IsEmpty(j - 1, i) && DoorLocations.IsEmpty(j - 1, i)))
+				if (x == 0 || (HallGrid.IsEmpty(x - 1, y) && DoorLocations.IsEmpty(x - 1, y)))
 				{
 					FWallPlacement wall;
 					wall.Rotation = FRotator(0.0f, -90.0f, 0.0f);
-					wall.Position.X = (static_cast<float>(j)) * blockSize.X;
-					wall.Position.Y = (static_cast<float>(i) + 1.0f - WallComponentAlignment.Y) * blockSize.Y;
+					wall.Position.X = (static_cast<float>(x)) * blockSize.X;
+					wall.Position.Y = (static_cast<float>(y) + 1.0f - WallComponentAlignment.Y) * blockSize.Y;
 					wall.Position.Z = blockZPos;
 
 					walls.Add(wall);
 				}
 
 				// Check right side of the tile
-				if (j == gridSize.X - 1 || (HallGrid.IsEmpty(j + 1, i) && DoorLocations.IsEmpty(j + 1, i)))
+				if (x == gridSize.X - 1 || (HallGrid.IsEmpty(x + 1, y) && DoorLocations.IsEmpty(x + 1, y)))
 				{
 					FWallPlacement wall;
 					wall.Rotation = FRotator(0.0f, 90.0f, 0.0f);
-					wall.Position.X = (static_cast<float>(j) + 1.0f) * blockSize.X;
-					wall.Position.Y = (static_cast<float>(i) + WallComponentAlignment.Y) * blockSize.Y;
+					wall.Position.X = (static_cast<float>(x) + 1.0f) * blockSize.X;
+					wall.Position.Y = (static_cast<float>(y) + WallComponentAlignment.Y) * blockSize.Y;
 					wall.Position.Z = blockZPos;
 
 					walls.Add(wall);
 				}
 
 				// Check top side of the tile
-				if (i == 0 || (HallGrid.IsEmpty(j, i - 1) && DoorLocations.IsEmpty(j , i - 1)))
+				if (y == 0 || (HallGrid.IsEmpty(x, y - 1) && DoorLocations.IsEmpty(x , y - 1)))
 				{
 					FWallPlacement wall;
 					wall.Rotation = FRotator(0.0f, 0.0f, 0.0f);
-					wall.Position.X = (static_cast<float>(j) + WallComponentAlignment.X) * blockSize.X;
-					wall.Position.Y = (static_cast<float>(i)) * blockSize.Y;
+					wall.Position.X = (static_cast<float>(x) + WallComponentAlignment.X) * blockSize.X;
+					wall.Position.Y = (static_cast<float>(y)) * blockSize.Y;
 					wall.Position.Z = blockZPos;
 
 					walls.Add(wall);
 				}
 
 				// Check bottom side of the tile
-				if (j == gridSize.Y - 1 || (HallGrid.IsEmpty(j, i + 1) && DoorLocations.IsEmpty(j, i + 1)))
+				if (y == gridSize.Y - 1 || (HallGrid.IsEmpty(x, y + 1) && DoorLocations.IsEmpty(x, y + 1)))
 				{
 					FWallPlacement wall;
 					wall.Rotation = FRotator(0.0f, 180.0f, 0.0f);
-					wall.Position.X = (static_cast<float>(j) + 1.0f - WallComponentAlignment.X) * blockSize.X;
-					wall.Position.Y = (static_cast<float>(i) + 1.0f) * blockSize.Y;
+					wall.Position.X = (static_cast<float>(x) + 1.0f - WallComponentAlignment.X) * blockSize.X;
+					wall.Position.Y = (static_cast<float>(y) + 1.0f) * blockSize.Y;
 					wall.Position.Z = blockZPos;
 
 					walls.Add(wall);
