@@ -24,7 +24,7 @@ ALasers::ALasers()
 	AlarmComponent = CreateDefaultSubobject<UAlarmComponent>("Alarm");
 
 	FScriptDelegate overlapDelegate;
-	overlapDelegate.BindUFunction(this, "OnLaserAreaOverlap");
+	overlapDelegate.BindUFunction(this, "OnLaserAreaBeginOverlap");
 	LaserArea->OnComponentBeginOverlap.Add(overlapDelegate);
 }
 
@@ -60,7 +60,7 @@ void ALasers::BeginPlay()
 	AddLasers();
 }
 
-void ALasers::OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ALasers::OnLaserAreaBeginOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (Cast<AActor>(OverlappedComponent) == PlayerPawn)
 	{

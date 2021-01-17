@@ -25,12 +25,15 @@ public:
 	void PlaceFloor(const class FMapGrid& HallMask, const class FMapGrid& RoomMask, const class FMapGrid& VentEntranceMask, const class FMapGrid& VentMask);
 
 public:	
+	/** The alignment of the mesh in the floor component. (0, 0) means that the mesh starts at local (0,0) coordinate and extends in the positive X and Y direction */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The alignment of the mesh in the floor component. (0, 0) means that the mesh starts at local (0,0) coordinate and extends in the positive X and Y direction"))
 	FVector2D FloorComponentAlignment = FVector2D(0.5f);
 
-	UPROPERTY(EditDefaultsOnly)
+	/** The mesh component to use as floor */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh component to use as floor"))
 	TSubclassOf<UStaticMeshComponent> FloorTileMeshComponent = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly)
+	/** The mesh component to use as vent tile */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh component to use as vent tile"))
 	TSubclassOf<UStaticMeshComponent> VentTileMeshComponent = nullptr;
 };

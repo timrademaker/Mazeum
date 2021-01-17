@@ -23,7 +23,7 @@ void APickUpBase::PickUpItem(const AActor* PickedUpBy)
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
-	ItemPickedUpDelegate.Broadcast();
+	ItemPickedUpEvent.Broadcast();
 }
 
 void APickUpBase::BeginPlay()

@@ -5,6 +5,7 @@
 #include "../MapGrid.h"
 #include "RoomPlacement.h"
 
+/** Enum representing cardinal directions */
 enum class EDirection
 {
 	Left,

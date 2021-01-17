@@ -8,12 +8,6 @@
 #include "GameFramework/Actor.h"
 #include "SecurityCamera.generated.h"
 
-class UDecalComponent;
-class USplineComponent;
-class UStaticMeshComponent;
-
-class UAlarmComponent;
-
 UCLASS()
 class UNREALSFAS_API ASecurityCamera : public ABuildingBlockActorBase
 {
@@ -23,13 +17,17 @@ public:
 	// Sets default values for this actor's properties
 	ASecurityCamera();
 
+	/// Begin ABuildingBlockActorBase interface
 	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
+	/// End ABuildingBlockActorBase interface
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/** Construction script */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/** Called when the level is reset */
 	virtual void Reset() override;
 
 protected:
@@ -37,8 +35,12 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	/** Update what the camera is looking at */
+	/** 
+	 * Update what the camera is looking at
+	 * @param DeltaTime The time since the last camera update
+	 */
 	void UpdateCameraTargetPosition(float DeltaTime);
+
 	/** Check if the camera is able to see an actor 
 	 * @param Actor The actor for which to check if the camera is able to see it
 	 * @returns True if the camera is able to see the actor
@@ -46,17 +48,23 @@ private:
 	bool CameraCanSeeActor(const AActor* Actor);
 
 public:
+	/** How long (in seconds) the player can stay in the camera's view before the alarm is raised */
 	UPROPERTY(EditAnywhere, Category = Timing, meta = (ToolTip = "How long (in seconds) the player can stay in the camera's view before the alarm is raised", ClampMin = "0.0"))
 	float MaximumTimeInView = 0.05f;
+	/** The camera's field of view in degrees */
 	UPROPERTY(EditAnywhere, Category = Vision, meta = (ToolTip = "The camera's field of view in degrees", ClampMin = "0.0", ClampMax = "180.0"))
 	float FieldOfView = 15.0f;
 	
-	UPROPERTY(EditDefaultsOnly)
+	/** The decal that indicates where the camera is looking */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The decal that indicates where the camera is looking"))
 	UDecalComponent* CameraAreaDecal;
-	UPROPERTY(EditDefaultsOnly)
+	/** The path this camera follows */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The path this camera follows"))
 	class USecurityCameraPathComponent* CameraPath;
+	/** The camera's static mesh component */
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* CameraMesh;	// Will probably be changed to a different type later on, if the camera needs to rotate
+	class UStaticMeshComponent* CameraMesh;	// Will probably be changed to a different type later on, if the camera needs to rotate
+	/** The camera's spotlight, indicating where the camera is looking */
 	UPROPERTY(EditDefaultsOnly)
 	class USpotLightComponent* SpotLight;
 	
@@ -64,7 +72,7 @@ private:
 	/** The player's pawn */
 	APawn* PlayerPawn = nullptr;
 	/** The camera's alarm component */
-	UAlarmComponent* AlarmComponent = nullptr;
+	class UAlarmComponent* AlarmComponent = nullptr;
 
 	/** The cosine of half of the camera's field of view, used to determine if the camera can see an actor */
 	float HalfFieldOfViewCosine = 0.0f;

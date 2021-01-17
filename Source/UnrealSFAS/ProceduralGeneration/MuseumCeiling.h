@@ -24,6 +24,7 @@ public:
 	void PlaceCeiling(const class FMapGrid& HallMask, const class FMapGrid& RoomMask);
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	/** The mesh component to use as ceiling */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh component to use as ceiling"))
 	TSubclassOf<UStaticMeshComponent> CeilingMeshComponent = nullptr;
 };

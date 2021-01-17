@@ -14,13 +14,18 @@ class UNREALSFAS_API AMuseumVents : public AActor
 public:
 	AMuseumVents();
 
-	/** Place vents based on a grid */
+	/**
+	 * Place vents based on a grid
+	 * @param Grid The grid representing the vent layout
+	 */
 	void PlaceVents(const class FMapGrid& Grid);
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	/** The mesh to use for the vents */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh to use for the vents"))
 	UStaticMesh* VentMesh = nullptr;
 
-	UPROPERTY(EditDefaultsOnly)
+	/** The material to use for the vents */
+	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The material to use for the vents"))
 	UMaterialInterface* VentMaterial = nullptr;
 };

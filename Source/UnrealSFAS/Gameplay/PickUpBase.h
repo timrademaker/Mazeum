@@ -14,7 +14,7 @@ class UNREALSFAS_API APickUpBase : public ARandomProp, public IInteractableInter
 {
 	GENERATED_BODY()
 		
-	DECLARE_MULTICAST_DELEGATE(FItemPickedUp);
+	DECLARE_EVENT(APickUpBase, FItemPickedUp);
 	
 public:	
 	// Sets default values for this actor's properties
@@ -22,11 +22,15 @@ public:
 
 	virtual void Interact(const AActor* InstigatedBy = nullptr) override;
 
+	/**
+	 * Pick up this item
+	 * @param PickedUpBy The actor picking up this item
+	 */
 	UFUNCTION(BlueprintCallable, meta  = (ToolTip = "Pick this item up", DefaultToSelf="PickedUpBy"))
 	void PickUpItem(const AActor* PickedUpBy);
 
-	/** Delegate for when the item is picked up */
-	FORCEINLINE FItemPickedUp& OnItemPickedUp() { return ItemPickedUpDelegate; }
+	/** Get the event that is broadcast when the item is picked up */
+	FORCEINLINE FItemPickedUp& OnItemPickedUp() { return ItemPickedUpEvent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,6 +41,6 @@ public:
 	TSubclassOf<ARandomProp> RandomPropBlueprint;
 
 private:
-	/** The delegate that sends out an event when this item is picked up */
-	FItemPickedUp ItemPickedUpDelegate;
+	/** The event that sends out an event when this item is picked up */
+	FItemPickedUp ItemPickedUpEvent;
 };

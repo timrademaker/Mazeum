@@ -12,7 +12,7 @@ class UNREALSFAS_API UAlarmComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE(FAlarmTriggered);
+	DECLARE_EVENT(UAlarmComponent, FAlarmTriggered);
 
 public:	
 	// Sets default values for this component's properties
@@ -20,12 +20,12 @@ public:
 
 	/** Trigger the alarm and send out an event */
 	UFUNCTION(BlueprintCallable)
-	void TriggerAlarm() const { AlarmTriggeredDelegate.Broadcast(); }
+	void TriggerAlarm() const { AlarmTriggeredEvent.Broadcast(); }
 
-	/** Delegate for when the alarm is triggered */
-	FORCEINLINE FAlarmTriggered& OnAlarmTriggered() { return AlarmTriggeredDelegate; }
-
+	/** Get the event that is broadcast when the alarm is triggered */
+	FORCEINLINE FAlarmTriggered& OnAlarmTriggered() { return AlarmTriggeredEvent; }
 
 private:
-	FAlarmTriggered AlarmTriggeredDelegate;
+	/** The event that is broadcast when the alarm is triggered */
+	FAlarmTriggered AlarmTriggeredEvent;
 };

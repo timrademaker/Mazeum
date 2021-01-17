@@ -21,33 +21,45 @@ class UNREALSFAS_API ALasers : public ABuildingBlockActorBase
 public:	
 	ALasers();
 
+	/** Construction script */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/**
+	 * Enable or disable the lasers
+	 * @param Enabled True if the lasers should be enabled
+	 */
 	UFUNCTION(BlueprintCallable, meta = (ToolTip = "Enable or disable the lasers", Keywords = "Enable Disable"))
 	void SetLasersEnabled(const bool Enabled);
 
+	/// Begin ABuildingBlockActorBase interface
 	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
+	/// End ABuildingBlockActorBase interface
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
+	/** Callback for laser overlap */
 	UFUNCTION()
-	void OnLaserAreaOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
+	void OnLaserAreaBeginOverlap(UPrimitiveComponent* OverlappingComponent, UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 
 	/** Add lasers to this object based on NumberOfLasers */
 	void AddLasers();
 
 public:
+	/** The number of lasers to place vertically inside the laser bounding box */
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "The number of lasers to place vertically inside the laser bounding box"))
 	uint8 NumberOfLasers = 6;
 
+	/** The mesh to use for the laser beam */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh to use for the laser beam"))
 	UStaticMesh* LaserBeamMesh;
 
+	/** The mesh to use on either side of the laser beam */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The mesh to use on either side of the laser beam"))
 	UStaticMesh* LaserEndMesh;
 
+	/** The area in which the lasers are placed. If the player enters this area, the alarm is triggered. */
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "The area in which the lasers are placed. If the player enters this area, the alarm is triggered."))
 	UBoxComponent* LaserArea;
 
@@ -63,5 +75,4 @@ private:
 	/** An array of meshes placed at the end of lasers */
 	TArray<UStaticMeshComponent*> AddedLaserEnds;
 #endif
-
 };
