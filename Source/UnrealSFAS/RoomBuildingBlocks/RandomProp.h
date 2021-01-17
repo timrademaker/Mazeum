@@ -9,6 +9,7 @@
 #include "GameFramework/Actor.h"
 #include "RandomProp.generated.h"
 
+/** Actor that is turned into a random prop when the game starts */
 UCLASS()
 class UNREALSFAS_API ARandomProp : public ABuildingBlockActorBase
 {
@@ -18,7 +19,9 @@ public:
 	// Sets default values for this actor's properties
 	ARandomProp();
 
+	/// ABuildingBlockActorBase interface
 	virtual void SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent) override;
+	/// End of ABuildingBlockActorBase interface
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,19 +32,25 @@ private:
 	void SetUpProp();
 
 public:
-	UPROPERTY(EditAnywhere, meta = (ToolTip = "The size of the required prop"))
+	/** The size of the prop to place at this actor's location */
+	UPROPERTY(EditAnywhere, meta = (ToolTip = "The size of the prop to place at this actor's location"))
 	EPropSize PropSize;
 
+	/** Props that fit on the small pedestal */
 	UPROPERTY(EditDefaultsOnly, Category = Meshes, meta = (ToolTip = "Props that fit on the small pedestal"))
 	TArray<UStaticMesh*> SmallProps;
 
 	UPROPERTY(EditDefaultsOnly, Category = Meshes)
 	TArray<UStaticMesh*> MediumProps;
 
-	UPROPERTY(EditDefaultsOnly, Category = Meshes, meta = (ToolTip = "Props that fit on the wide table"))
+	/** Props that fit on the wide pedestal */
+	UPROPERTY(EditDefaultsOnly, Category = Meshes, meta = (ToolTip = "Props that fit on the wide pedestal"))
 	TArray<UStaticMesh*> LargeProps;
 
 protected:
 	/** The static mesh for this prop */
 	UStaticMeshComponent* StaticMesh;
+
+	/** The collider to use for this prop */
+	class UBoxComponent* BoxCollider;
 };

@@ -5,6 +5,8 @@
 
 #include "RandomPropComponent.h"
 
+#include "Components/BoxComponent.h"
+
 // Sets default values
 ARandomProp::ARandomProp()
 {
@@ -14,6 +16,10 @@ ARandomProp::ARandomProp()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	StaticMesh->SetupAttachment(RootComponent);
+
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Collider"));
+	BoxCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	BoxCollider->SetupAttachment(RootComponent);
 }
 
 void ARandomProp::SetUpBuildingBlock(const UBuildingBlockMeshComponent* BuildingBlockComponent)
@@ -66,6 +72,11 @@ void ARandomProp::SetUpProp()
 		// Select random prop
 		UStaticMesh* meshToUse = (*meshArrah)[FMath::RandRange(0, meshArrah->Num() - 1)];
 		StaticMesh->SetStaticMesh(meshToUse);
+
+		// Set up box collision
+		const FVector meshExtent = StaticMesh->GetStaticMesh()->GetBounds().BoxExtent;
+		BoxCollider->SetBoxExtent(meshExtent);
+		BoxCollider->AddLocalOffset(FVector(0.0f, 0.0f, meshExtent.Z));
 	}
 
 	if (shouldBeRotated)
