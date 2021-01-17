@@ -41,10 +41,12 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 		{
 			if (!MuseumLayout.IsEmpty(x, y))
 			{
+				UClass* room = nullptr;
+				FRotator roomRotation;
+
 				// Determine the "depth" of the emptiness
 				EDirection dir = EDirection::Left;
-				int emptyTiles = 0;
-				emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x - 1, y, dir);
+				int emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x - 1, y, dir);
 
 				if (emptyTiles == 0)
 				{
@@ -52,44 +54,33 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 					emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x + 1, y, dir);
 				}
 
-				if (emptyTiles == 0)
+				if (emptyTiles > 0)
+				{
+					// See if a room can be found for this tile in the current direction (left or right)
+					const unsigned int emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
+					const unsigned int emptyWidth = emptyTiles;
+					GetFittingRoom(PossibleRooms, emptyWidth, emptyDepth, dir, room, roomRotation);
+				}
+
+				if (!room)
 				{
 					dir = EDirection::Up;
 					emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x, y - 1, dir);
-				}
 
-				if (emptyTiles == 0)
-				{
-					dir = EDirection::Down;
-					emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x, y + 1, dir);
+					if (emptyTiles == 0)
+					{
+						dir = EDirection::Down;
+						emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x, y + 1, dir);
+					}
+					
+					if (emptyTiles > 0)
+					{
+						// See if a room can be found for this tile in the current direction (up or down)
+						const unsigned int emptyDepth = emptyTiles;
+						const unsigned int emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
+						GetFittingRoom(PossibleRooms, emptyWidth, emptyDepth, dir, room, roomRotation);
+					}
 				}
-				// TODO: Issue: Not all directions are checked if one of them has some space but not enough to place a room
-
-				if (emptyTiles == 0)
-				{
-					continue;
-				}
-
-				// Determine the number of walls with adjacent empty space
-				// Variables representing the dimensions of the empty space
-				unsigned int emptyDepth = 0;
-				unsigned int emptyWidth = 0;
-
-				if (dir == EDirection::Left || dir == EDirection::Right)
-				{
-					emptyWidth = emptyTiles;
-					emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
-				}
-				else
-				{
-					emptyDepth = emptyTiles;
-					emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
-				}
-
-				// Find a suitable room for these dimensions
-				UClass* room = nullptr;
-				FRotator roomRotation;
-				GetFittingRoom(PossibleRooms, emptyWidth, emptyDepth, dir, room, roomRotation);
 
 				if (room)
 				{
