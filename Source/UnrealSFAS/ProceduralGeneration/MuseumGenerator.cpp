@@ -11,11 +11,10 @@ void FMuseumGenerator::GenerateMuseum(const TArray<TSubclassOf<ARoomTemplate>>& 
 	OutRoomMask = FMapGrid(mapWidth, mapDepth);
 
 	FMuseumGenerator::GenerateRoomPlacement(OutHallMask, PossibleRooms, OutRoomPlacement, OutRoomMask);
-	
+
 	FMuseumGenerator::SetUpTargetRoom(OutRoomPlacement);
 
 	OutDoorMask = FMuseumGenerator::CreateBuildingBlockMask(OutRoomPlacement, EBuildingBlockType::Door, mapWidth, mapDepth);
-	
 
 	FMuseumGenerator::GenerateVentLayout(mapWidth, mapDepth, OutRoomPlacement, OutVentMask, OutVentEntranceMask);
 
@@ -46,7 +45,7 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 
 				// Determine the "depth" of the emptiness
 				EDirection dir = EDirection::Left;
-				int emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x - 1, y, dir);
+				unsigned int emptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x - 1, y, dir);
 
 				if (emptyTiles == 0)
 				{
@@ -58,6 +57,27 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 				{
 					// See if a room can be found for this tile in the current direction (left or right)
 					const unsigned int emptyDepth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
+
+					// Check if all of the tiles the found area spans are actually empty
+					unsigned int minimumEmptyTiles = emptyTiles;
+					for (unsigned int i = 1; i < emptyDepth; ++i)
+					{
+						unsigned int currentEmptyTiles = 0;
+						if (dir == EDirection::Left)
+						{
+							currentEmptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x - 1, y + i, dir);
+						}
+						else
+						{
+							currentEmptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x + 1, y + i, dir);
+						}
+
+						minimumEmptyTiles = FMath::Min(currentEmptyTiles, minimumEmptyTiles);
+					}
+					emptyTiles = FMath::Min(emptyTiles, minimumEmptyTiles);
+
+					// TODO: Check both options if needed
+
 					const unsigned int emptyWidth = emptyTiles;
 					GetFittingRoom(PossibleRooms, emptyWidth, emptyDepth, dir, room, roomRotation);
 				}
@@ -75,9 +95,29 @@ void FMuseumGenerator::GenerateRoomPlacement(const FMapGrid& MuseumLayout, const
 					
 					if (emptyTiles > 0)
 					{
+						const unsigned int emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
+
+						// Check if all of the tiles the found area spans are actually empty
+						unsigned int minimumEmptyTiles = emptyTiles;
+						for (unsigned int i = 1; i < emptyWidth; ++i)
+						{
+							unsigned int currentEmptyTiles = 0;
+
+							if (dir == EDirection::Up)
+							{
+								currentEmptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x + i, y - 1, dir);
+							}
+							else
+							{
+								currentEmptyTiles = ContiguousEmptyTileCount(MuseumLayout, OutRoomMask, x + i, y + 1, dir);
+							}
+
+							minimumEmptyTiles = FMath::Min(currentEmptyTiles, minimumEmptyTiles);
+						}
+						emptyTiles = FMath::Min(emptyTiles, minimumEmptyTiles);
+
 						// See if a room can be found for this tile in the current direction (up or down)
 						const unsigned int emptyDepth = emptyTiles;
-						const unsigned int emptyWidth = ContiguousUnoccupiedWallCount(MuseumLayout, OutRoomMask, x, y, dir);
 						GetFittingRoom(PossibleRooms, emptyWidth, emptyDepth, dir, room, roomRotation);
 					}
 				}
