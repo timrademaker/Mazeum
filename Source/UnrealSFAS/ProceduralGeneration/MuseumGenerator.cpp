@@ -351,28 +351,27 @@ unsigned int FMuseumGenerator::ContiguousUnoccupiedWallCount(const FMapGrid& Mus
 
 	if (EmptyTileDirection == EDirection::Left || EmptyTileDirection == EDirection::Right)
 	{
-		//searchDirection = EDirection::Down;
 		searchOffset = FIntPoint(0, 1);
 	}
 
-	// The offset in which to check for walls (e.g. (-1, 0) means that we are looking for blocking walls on the left of X, Y)
-	FIntPoint wallCheckOffset;
+	// The offset in which to check for filled tiles (e.g. (-1, 0) means that we are looking for blocking tiles on the left of X, Y)
+	FIntPoint blockCheckOffset;
 
 	if (EmptyTileDirection == EDirection::Left)
 	{
-		wallCheckOffset = FIntPoint(-1, 0);
+		blockCheckOffset = FIntPoint(-1, 0);
 	}
 	else if (EmptyTileDirection == EDirection::Right)
 	{
-		wallCheckOffset = FIntPoint(1, 0);
+		blockCheckOffset = FIntPoint(1, 0);
 	}
 	else if (EmptyTileDirection == EDirection::Up)
 	{
-		wallCheckOffset = FIntPoint(0, -1);
+		blockCheckOffset = FIntPoint(0, -1);
 	}
 	else
 	{
-		wallCheckOffset = FIntPoint(0, 1);
+		blockCheckOffset = FIntPoint(0, 1);
 	}
 
 	int unoccupiedWallCount = 0;
@@ -383,8 +382,8 @@ unsigned int FMuseumGenerator::ContiguousUnoccupiedWallCount(const FMapGrid& Mus
 	while (X >= 0 && X <= maxX
 		&& Y >= 0 && Y <= maxY
 		&& !MuseumLayout.IsEmpty(X, Y)
-		&& MuseumLayout.IsEmpty(X + wallCheckOffset.X, Y + wallCheckOffset.Y)	// Check if there is a wall perpendicular to the wall we are checking
-		&& (RoomMask.IsEmpty(X - 1, Y) || RoomMask.IsEmpty(X + 1, Y) || RoomMask.IsEmpty(X, Y - 1) || RoomMask.IsEmpty(X, Y + 1))	// Check if there is a room next to the wall we are checking
+		&& MuseumLayout.IsEmpty(X + blockCheckOffset.X, Y + blockCheckOffset.Y)	// Check if there is a wall perpendicular to the wall we are checking
+		&& (RoomMask.IsEmpty(X + blockCheckOffset.X , Y + blockCheckOffset.Y))	// Check if there is a room next to the wall we are checking
 		)
 	{
 		++unoccupiedWallCount;
