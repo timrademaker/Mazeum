@@ -17,9 +17,9 @@ public:
 	// Sets default values for this actor's properties
 	ASecurityCamera();
 
-	/// Begin ABuildingBlockActorBase interface
+	/// ABuildingBlockActorBase interface
 	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
-	/// End ABuildingBlockActorBase interface
+	/// End of ABuildingBlockActorBase interface
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

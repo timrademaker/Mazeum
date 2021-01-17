@@ -19,10 +19,13 @@ struct FBuildingBlockPlacementStruct : public FTableRowBase
 {
     GENERATED_BODY();
 
+    /** The type of room */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<ARoomTemplate> RoomType;
+    /** The type of building block */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EBuildingBlockType BlockType;
+    /** The grid location of the block */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FIntPoint> BlockLocation;
 };

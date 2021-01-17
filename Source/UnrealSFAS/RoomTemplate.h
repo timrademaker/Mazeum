@@ -21,6 +21,7 @@ public:
 	ARoomTemplate();
 	~ARoomTemplate();
 
+	/** Construction script */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** 
@@ -51,15 +52,19 @@ private:
 #endif
 
 public:
+	/** The size of the room template in tiles */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The size of the room template in tiles"))
 	FIntVector RoomSize = FIntVector(5, 5, 5);
 
+	/** The paths guards can follow in this room */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The paths guards can follow in this room"))
 	TArray<UGuardPatrolPathComponent*> GuardPaths;
 
+	/** The table to store building block placement positions in. Should use BuildingBlockPlacementStruct as row structure */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The table to store building block placement positions in. Should use BuildingBlockPlacementStruct as row structure"))
 	class UDataTable* BuildingBlockPlacementTable;
 
+	/** The class to use for pick-ups */
 	UPROPERTY(EditDefaultsOnly, meta = (ToolTip = "The class to use for pick-ups"))
 	TSubclassOf<APickUpBase> PickupClass;
 	

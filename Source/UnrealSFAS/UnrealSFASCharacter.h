@@ -14,6 +14,7 @@ class AUnrealSFASCharacter : public ACharacter
 public:
 	AUnrealSFASCharacter();
 
+	/** Called when the level is reset */
 	virtual void Reset() override;
 
 	/** Returns CameraBoom subobject **/

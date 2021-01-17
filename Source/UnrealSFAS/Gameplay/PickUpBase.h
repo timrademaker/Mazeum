@@ -20,7 +20,9 @@ public:
 	// Sets default values for this actor's properties
 	APickUpBase();
 
+	// IInteractableInterface interface
 	virtual void Interact(const AActor* InstigatedBy = nullptr) override;
+	// Enf of IInteractableInterface interface
 
 	/**
 	 * Pick up this item

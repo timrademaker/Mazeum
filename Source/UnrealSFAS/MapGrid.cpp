@@ -63,13 +63,3 @@ void FMapGrid::Clear()
         SetRow(row, 0);
     }
 }
-
-uint32 FMapGrid::GetWidth() const
-{
-    return Width;
-}
-
-uint32 FMapGrid::GetDepth() const
-{
-    return Depth;
-}

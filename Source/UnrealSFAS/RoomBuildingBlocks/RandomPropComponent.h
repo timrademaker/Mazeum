@@ -17,6 +17,7 @@ class UNREALSFAS_API URandomPropComponent : public UBuildingBlockMeshComponent
 	GENERATED_BODY()
 	
 public:
+    /** The size of the prop to place at this location */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The size of the prop to place at this location"))
     EPropSize PropSize;
 };

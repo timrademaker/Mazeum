@@ -21,6 +21,9 @@ class UNREALSFAS_API IInteractableInterface
 	GENERATED_BODY()
 
 public:
+    /**
+     * Interact with this item
+     * @param InstigatedBy The actor interacting with this item
+     */
     virtual void Interact(const AActor* InstigatedBy = nullptr) = 0;
-
 };

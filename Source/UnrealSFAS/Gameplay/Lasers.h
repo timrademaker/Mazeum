@@ -31,9 +31,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (ToolTip = "Enable or disable the lasers", Keywords = "Enable Disable"))
 	void SetLasersEnabled(const bool Enabled);
 
-	/// Begin ABuildingBlockActorBase interface
+	/// ABuildingBlockActorBase interface
 	virtual void SetUpBuildingBlock(const class UBuildingBlockMeshComponent* BuildingBlockComponent) override;
-	/// End ABuildingBlockActorBase interface
+	/// End of ABuildingBlockActorBase interface
 
 protected:
 	virtual void BeginPlay() override;

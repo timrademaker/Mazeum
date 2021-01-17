@@ -74,18 +74,23 @@ private:
     void OnGameLose();
 
 public:
+    /** The maximum number of guards to spawn */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The maximum number of guards to spawn"))
     uint8 MaximumGuardCount = 10;
 
+    /** The guard class to use when spawning guards */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The guard class to use when spawning guards"))
     TSubclassOf<class AGuard> GuardClass;
 
+    /** The widget to display when the player wins */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The widget to display when the player wins"))
     TSubclassOf<UUserWidget> WinWidget;
 
+    /** The widget to display when the player loses */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The widget to display when the player loses"))
     TSubclassOf<UUserWidget> LoseWidget;
 
+    /** The widget to display when the player pauses the game */
     UPROPERTY(EditAnywhere, meta = (ToolTip = "The widget to display when the player pauses the game"))
     TSubclassOf<UUserWidget> PauseWidget;
 
