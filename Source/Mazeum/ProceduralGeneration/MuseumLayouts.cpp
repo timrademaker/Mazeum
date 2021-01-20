@@ -18,22 +18,29 @@ void FMuseumLayouts::PopulateMuseumLayoutArray()
     MuseumLayoutArray.Empty();
 
     {
-        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(15, 15));
+        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(15, 17));
 
-        layout.SetRow(0, 0b111110000000000);
-        layout.SetRow(1, 0b111110000000000);
-        layout.SetRow(2, 0b000110000000000);
-        layout.SetRow(3, 0b000110000000000);
-        layout.SetRow(4, 0b000110000000000);
-        layout.SetRow(5, 0b000111111111000);
-        layout.SetRow(6, 0b000100000011000);
-        layout.SetRow(7, 0b000100000011000);
-        layout.SetRow(8, 0b000100000011000);
-        layout.SetRow(9, 0b000111111111000);
+        layout.SetRow(0 , 0b111110000000000);
+        layout.SetRow(1 , 0b111110000000000);
+        layout.SetRow(2 , 0b000110000000000);
+        layout.SetRow(3 , 0b000110000000000);
+        layout.SetRow(4 , 0b000110000000000);
+        layout.SetRow(5 , 0b000111111111000);
+        layout.SetRow(6 , 0b000110000011000);
+        layout.SetRow(7 , 0b000110000011000);
+        layout.SetRow(8 , 0b000110000011000);
+        layout.SetRow(9 , 0b000110000011000);
+        layout.SetRow(10, 0b000110000011000);
+        layout.SetRow(11, 0b000111111111000);
+        layout.SetRow(12, 0b000000000000000);
+        layout.SetRow(13, 0b000000000000000);
+        layout.SetRow(14, 0b000000000000000);
+        layout.SetRow(15, 0b000000000000000);
+        layout.SetRow(16, 0b000000000000000);
     }
 
     {
-        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(15, 14));
+        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(15, 16));
 
         layout.SetRow(0 , 0b111111100000000);
         layout.SetRow(1 , 0b111111100000000);
@@ -49,6 +56,8 @@ void FMuseumLayouts::PopulateMuseumLayoutArray()
         layout.SetRow(11, 0b000000000000000);
         layout.SetRow(12, 0b000000000000000);
         layout.SetRow(13, 0b000000000000000);
+        layout.SetRow(14, 0b000000000000000);
+        layout.SetRow(15, 0b000000000000000);
     }
     
     {
@@ -75,7 +84,7 @@ void FMuseumLayouts::PopulateMuseumLayoutArray()
     }
     
     {
-        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(18, 22));
+        FMapGrid& layout = MuseumLayoutArray.Add_GetRef(FMapGrid(18, 23));
 
         layout.SetRow(0 , 0b111111111111111111);
         layout.SetRow(1 , 0b111111111111111111);
@@ -99,5 +108,6 @@ void FMuseumLayouts::PopulateMuseumLayoutArray()
         layout.SetRow(19, 0b000000000000000000);
         layout.SetRow(20, 0b000000000000000000);
         layout.SetRow(21, 0b000000000000000000);
+        layout.SetRow(22, 0b000000000000000000);
     }
 }
