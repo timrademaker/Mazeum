@@ -107,17 +107,6 @@ void AStealthGameMode::SetPauseState(bool NewPauseState)
 {
     PlayerController->SetPause(NewPauseState);
     PlayerController->bShowMouseCursor = NewPauseState;
-    
-    /*
-    if (NewPauseState)
-    {
-        PlayerController->SetInputMode(FInputModeUIOnly());
-    }
-    else
-    {
-        PlayerController->SetInputMode(FInputModeGameOnly());
-    }
-    */
 }
 
 void AStealthGameMode::TogglePause()
