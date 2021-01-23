@@ -27,7 +27,7 @@ pipeline {
         GIT_REPO_URL = 'https://bitbucket.org/timrademaker/sfas_2021_unreal'    // The url of the git repo to build
 
         // Project
-        PROJECT_NAME = 'UnrealSFAS'                                 // The name of the project file (without '.uproject')
+        PROJECT_NAME = 'Mazeum'                                     // The name of the project file (without '.uproject')
         PROJECT_DIRECTORY = '.'                                     // Project directory, relative to the workspace root
         BUILD_OUT_DIR = "${env.WORKSPACE}/out/build"                // The folder in which to output the build
 
